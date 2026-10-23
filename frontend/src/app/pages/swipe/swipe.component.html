@@ -1,0 +1,85 @@
+<section class="swipe">
+  <header class="titulo">
+    <h1>¿Te sirve o te sobra?</h1>
+    @if (ciclo(); as c) {
+      <p>Ciclo <strong>{{ c.nombre }}</strong> · {{ mazo().length }} por votar @if (votados()) { · ya votaste {{ votados() }} }</p>
+    }
+  </header>
+
+  @if (cargando()) {
+    <div class="mazo"><div class="tarjeta esqueleto"></div></div>
+  } @else if (!ciclo()) {
+    <div class="vacio tarjeta-blanca">
+      <span class="emoji">😴</span>
+      <h2>No hay ciclo de votación abierto</h2>
+      <p>Calidad todavía no abrió el trimestre. Mientras tanto, mirá los resultados o andá a un casamiento.</p>
+    </div>
+  } @else if (!actual()) {
+    <div class="vacio tarjeta-blanca">
+      <span class="emoji">🏝️</span>
+      <h2>No hay más procedimientos para vos este trimestre.</h2>
+      <p>Volvé en 3 meses (o cuando haya burocracia nueva)</p>
+    </div>
+  } @else {
+    <div class="mazo">
+      @if (siguiente(); as s) {
+        <div class="tarjeta fondo" aria-hidden="true">
+          <div class="avatar">{{ s.codigo }}</div>
+          <h2>{{ s.nombre }}, {{ s.edadAnios }} años</h2>
+        </div>
+      }
+
+      @for (p of [actual()!]; track p.id) {
+        <div class="arrastrable"
+             cdkDrag
+             [cdkDragDisabled]="votando()"
+             (cdkDragMoved)="mover($event)"
+             (cdkDragEnded)="soltar($event)">
+          <article class="tarjeta" [class.saliendo]="salida()" [style.transform]="transformacion()">
+            <span class="sello sirve" [style.opacity]="opacidadSirve()">ME SIRVE</span>
+            <span class="sello sobra" [style.opacity]="opacidadSobra()">ME SOBRA</span>
+
+            <div class="cabecera">
+              <div class="avatar" [class.registro]="p.tipo === 'REGISTRO'">{{ p.codigo }}</div>
+              <div class="tipo">{{ p.tipo === 'REGISTRO' ? '📋 Registro' : '📘 Procedimiento' }}</div>
+            </div>
+
+            <h2>{{ p.nombre }}, {{ p.edadAnios }} años</h2>
+            <p class="areas">📍 {{ p.areas.join(' · ') }}</p>
+
+            @if (p.obligatorio) {
+              <span class="badge-obligatorio" [title]="p.baseObligatoriedad ?? ''">⚖️ Obligatorio por norma</span>
+            }
+
+            <p class="bio">“{{ p.bio }}”</p>
+
+            <dl class="datos">
+              <div><dt>⏱️ Te llevo:</dt><dd>{{ p.minutosPorUso }} min</dd></div>
+              <div><dt>🎁 Te doy:</dt><dd>{{ p.beneficio }}</dd></div>
+              <div><dt>📈 Me usan:</dt><dd>{{ p.usoTexto.replace('Me usan ', '') }}</dd></div>
+              <div><dt>🤵 Padrino:</dt><dd>{{ p.padrinoNombre ?? 'nadie se hace cargo' }}</dd></div>
+            </dl>
+          </article>
+        </div>
+      }
+    </div>
+
+    <div class="botones">
+      <button class="boton nope" (click)="votar('NOPE')" [disabled]="votando()" aria-label="Me sobra">✕</button>
+      <button class="boton like" (click)="votar('LIKE')" [disabled]="votando()" aria-label="Me sirve">♥</button>
+    </div>
+    <p class="ayuda">Arrastrá la tarjeta o usá las flechas ← →</p>
+  }
+
+  <p class="anonimo">🔒 Tu voto es anónimo: solo se ven resultados por área</p>
+</section>
+
+@if (match()) {
+  <div class="overlay-match" role="status">
+    <div class="contenido">
+      <div class="anillos">💍</div>
+      <h2>¡Es un match!</h2>
+      <p>Preparen la libreta</p>
+    </div>
+  </div>
+}

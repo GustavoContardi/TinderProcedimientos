@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-resultado-ciclo
+      author: tinder
+      changes:
+        - createTable:
+            tableName: resultado_ciclo
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: ciclo_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_resultado_ciclo, references: ciclo_votacion(id) } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_resultado_proc, references: procedimiento(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_resultado_area, references: area(id) } }
+              - column: { name: likes, type: INT, constraints: { nullable: false } }
+              - column: { name: nopes, type: INT, constraints: { nullable: false } }
+              - column: { name: total, type: INT, constraints: { nullable: false } }
+              - column: { name: pct_like, type: "NUMERIC(5,4)", constraints: { nullable: false } }
+              - column: { name: veredicto, type: VARCHAR(25), constraints: { nullable: false } }
+        - addUniqueConstraint:
+            tableName: resultado_ciclo
+            columnNames: ciclo_id, procedimiento_id, area_id
+            constraintName: uk_resultado_ciclo_proc_area
+        - sql:
+            sql: ALTER TABLE resultado_ciclo ADD CONSTRAINT ck_resultado_veredicto CHECK (veredicto IN ('MATCH','RECHAZO','SEGUNDA_CITA','QUORUM_INSUFICIENTE'))

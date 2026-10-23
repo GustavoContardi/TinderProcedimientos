@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-procedimiento
+      author: tinder
+      changes:
+        - createTable:
+            tableName: procedimiento
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: codigo, type: VARCHAR(20), constraints: { nullable: false, unique: true, uniqueConstraintName: uk_procedimiento_codigo } }
+              - column: { name: nombre, type: VARCHAR(200), constraints: { nullable: false } }
+              - column: { name: tipo, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: bio, type: TEXT, constraints: { nullable: false } }
+              - column: { name: fecha_creacion, type: DATE, constraints: { nullable: false } }
+              - column: { name: minutos_por_uso, type: INT, constraints: { nullable: false } }
+              - column: { name: usos_por_semana, type: INT, constraints: { nullable: false } }
+              - column: { name: beneficio, type: TEXT, constraints: { nullable: false } }
+              - column: { name: obligatorio, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: base_obligatoriedad, type: TEXT }
+              - column: { name: autor_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_procedimiento_autor, references: usuario(id) } }
+              - column: { name: version_express, type: TEXT }
+              - column: { name: estado, type: VARCHAR(30), constraints: { nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, defaultValueComputed: CURRENT_TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, defaultValueComputed: CURRENT_TIMESTAMP, constraints: { nullable: false } }
+        - sql:
+            sql: >
+              ALTER TABLE procedimiento
+                ADD CONSTRAINT ck_procedimiento_tipo CHECK (tipo IN ('PROCEDIMIENTO','REGISTRO')),
+                ADD CONSTRAINT ck_procedimiento_estado CHECK (estado IN
+                  ('EN_TINDER','SEGUNDA_CITA','PENDIENTE_CASAMIENTO','CASADO','PENDIENTE_VELORIO','VELADO')),
+                ADD CONSTRAINT ck_procedimiento_minutos CHECK (minutos_por_uso >= 0 AND usos_por_semana >= 0)

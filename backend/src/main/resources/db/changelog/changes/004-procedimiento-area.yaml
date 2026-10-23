@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-procedimiento-area
+      author: tinder
+      changes:
+        - createTable:
+            tableName: procedimiento_area
+            columns:
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_proc_area_proc, references: procedimiento(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_proc_area_area, references: area(id) } }
+        - addPrimaryKey:
+            tableName: procedimiento_area
+            columnNames: procedimiento_id, area_id
+            constraintName: pk_procedimiento_area

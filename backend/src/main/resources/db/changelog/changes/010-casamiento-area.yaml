@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-casamiento-area
+      author: tinder
+      changes:
+        - createTable:
+            tableName: casamiento_area
+            columns:
+              - column: { name: casamiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_cas_area_cas, references: casamiento(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_cas_area_area, references: area(id) } }
+        - addPrimaryKey:
+            tableName: casamiento_area
+            columnNames: casamiento_id, area_id
+            constraintName: pk_casamiento_area

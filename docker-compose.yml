@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tinder-postgres
+    environment:
+      POSTGRES_DB: tinder
+      POSTGRES_USER: tinder
+      POSTGRES_PASSWORD: tinder
+    ports:
+      - "5432:5432"
+    volumes:
+      - tinder-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tinder -d tinder"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  tinder-data:

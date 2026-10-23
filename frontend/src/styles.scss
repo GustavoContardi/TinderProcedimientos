@@ -1,0 +1,109 @@
+@use '@angular/material' as mat;
+
+// Paleta del proyecto
+:root {
+  --petroleo: #12343b;
+  --petroleo-claro: #1d4b54;
+  --ambar: #f2a541;
+  --match: #2e7d73;
+  --rechazo: #d0573f;
+  --gris: #8a9699;
+  --fondo: #f4f1ea;
+  --papel: #fffdf8;
+  --texto: #1f2a2c;
+  --fuente-titulos: Cambria, Georgia, 'Times New Roman', serif;
+  --fuente-cuerpo: Calibri, Carlito, Arial, Helvetica, sans-serif;
+}
+
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: (primary: mat.$cyan-palette, tertiary: mat.$orange-palette, theme-type: light),
+    typography: (plain-family: 'Calibri, Carlito, Arial, sans-serif', brand-family: 'Cambria, Georgia, serif'),
+    density: 0,
+  ));
+  // Forzamos los tokens principales a la paleta institucional
+  & {
+  --mat-sys-primary: #12343b;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #cfe3e6;
+  --mat-sys-on-primary-container: #12343b;
+  --mat-sys-secondary-container: #fbe3bf;
+  --mat-sys-on-secondary-container: #4a3002;
+  --mat-sys-tertiary: #f2a541;
+  --mat-sys-surface: #fffdf8;
+  --mat-sys-surface-container-low: #fffdf8;
+  --mat-sys-surface-container: #fbf8f1;
+  }
+}
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente-cuerpo);
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--fuente-titulos);
+  color: var(--petroleo);
+  margin: 0 0 .5rem;
+}
+
+a { color: var(--match); }
+
+.pagina {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.pagina > header { margin-bottom: 16px; }
+.pagina > header p { margin: 0; color: #5b6b6e; }
+
+.tarjeta-blanca {
+  background: var(--papel);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(18, 52, 59, .08);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.fila { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.fila > * { flex: 1 1 200px; }
+.espaciador { flex: 1 1 auto; }
+.vacio { text-align: center; padding: 32px 16px; color: #5b6b6e; }
+.vacio .emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
+.mat-mdc-form-field { width: 100%; }
+
+// Chips de estado y veredicto
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px; padding: 3px 10px;
+  font-size: .8rem; font-weight: 700; white-space: nowrap;
+}
+.veredicto-match { background: var(--match); color: #fff; }
+.veredicto-rechazo { background: var(--rechazo); color: #fff; }
+.veredicto-segunda { background: var(--ambar); color: #3d2600; }
+.veredicto-quorum { background: #d9dedf; color: #4a5658; }
+.estado-tinder { background: #fde6e1; color: #8a2f1d; }
+.estado-segunda { background: #fdeccd; color: #6b4300; }
+.estado-pend-casamiento { background: #d6ece9; color: #1d5a52; }
+.estado-casado { background: var(--match); color: #fff; }
+.estado-pend-velorio { background: #3b3b3b; color: #f2f2f2; }
+.estado-velado { background: #111; color: #bbb; }
+
+.snack-ok { --mdc-snackbar-container-color: var(--match); --mat-snack-bar-button-color: #fff; }
+.snack-error { --mdc-snackbar-container-color: var(--rechazo); --mat-snack-bar-button-color: #fff; }
+
+// Impresión: solo el documento
+@media print {
+  .no-print, app-root > header, nav.menu, footer.lema { display: none !important; }
+  body { background: #fff; }
+  .pagina { padding: 0; max-width: none; }
+}

@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-area
+      author: tinder
+      changes:
+        - createTable:
+            tableName: area
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: nombre, type: VARCHAR(120), constraints: { nullable: false, unique: true, uniqueConstraintName: uk_area_nombre } }

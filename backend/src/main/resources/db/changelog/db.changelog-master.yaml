@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - include: { file: changes/001-area.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/002-usuario.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/003-procedimiento.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/004-procedimiento-area.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/005-ciclo-votacion.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/006-participacion.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/007-voto.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/008-resultado-ciclo.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/009-casamiento.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/010-casamiento-area.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/011-velorio.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/012-alerta.yaml, relativeToChangelogFile: true }
+  - include: { file: changes/100-seed.yaml, relativeToChangelogFile: true }

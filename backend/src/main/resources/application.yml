@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tinder-procedimientos
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tinder
+    username: tinder
+    password: tinder
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false   # ANONIMATO: nunca loguear SQL con parámetros de votos
+    properties:
+      hibernate:
+        format_sql: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  jackson:
+    default-property-inclusion: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Reglas del Tinder (configurables)
+tinder:
+  quorum-minimo: 3        # menos votos que esto => QUORUM_INSUFICIENTE (no se muestran números)
+  umbral-match: 0.60      # pct_like >= umbral => MATCH
+  umbral-rechazo: 0.60    # pct_nope >= umbral => RECHAZO
+  dias-aviso-aniversario: 15
+  meses-aniversario: 6
+  cors-origins:
+    - http://localhost:4200
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-participacion
+      author: tinder
+      comment: Registra QUIÉN votó (para impedir el doble voto) pero NUNCA qué votó.
+      changes:
+        - createTable:
+            tableName: participacion
+            columns:
+              - column: { name: usuario_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_participacion_usuario, references: usuario(id) } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_participacion_proc, references: procedimiento(id) } }
+              - column: { name: ciclo_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_participacion_ciclo, references: ciclo_votacion(id) } }
+        - addPrimaryKey:
+            tableName: participacion
+            columnNames: usuario_id, procedimiento_id, ciclo_id
+            constraintName: pk_participacion

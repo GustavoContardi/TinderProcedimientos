@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-casamiento
+      author: tinder
+      changes:
+        - createTable:
+            tableName: casamiento
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_casamiento_proc, references: procedimiento(id) } }
+              - column: { name: fecha, type: DATE, constraints: { nullable: false } }
+              - column: { name: votos, type: TEXT, constraints: { nullable: false } }
+              - column: { name: padrino_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_casamiento_padrino, references: usuario(id) } }
+              - column: { name: oficiante_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_casamiento_oficiante, references: usuario(id) } }
+              - column: { name: grupal, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: fecha_aniversario, type: DATE, constraints: { nullable: false } }
+              - column: { name: estado, type: VARCHAR(15), constraints: { nullable: false } }
+        - sql:
+            sql: ALTER TABLE casamiento ADD CONSTRAINT ck_casamiento_estado CHECK (estado IN ('VIGENTE','RENOVADO','DIVORCIADO'))

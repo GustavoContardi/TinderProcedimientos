@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-usuario
+      author: tinder
+      changes:
+        - createTable:
+            tableName: usuario
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: nombre, type: VARCHAR(120), constraints: { nullable: false } }
+              - column: { name: email, type: VARCHAR(160), constraints: { nullable: false, unique: true, uniqueConstraintName: uk_usuario_email } }
+              - column: { name: password_hash, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: rol, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_usuario_area, references: area(id) } }
+        - sql:
+            sql: ALTER TABLE usuario ADD CONSTRAINT ck_usuario_rol CHECK (rol IN ('EMPLEADO','CALIDAD','DIRECCION'))

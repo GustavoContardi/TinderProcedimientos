@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-voto
+      author: tinder
+      comment: Registra QUÉ se votó, SIN usuario y SIN timestamp. El id es un UUID aleatorio para que el orden no delate a nadie.
+      changes:
+        - createTable:
+            tableName: voto
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_voto_proc, references: procedimiento(id) } }
+              - column: { name: ciclo_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_voto_ciclo, references: ciclo_votacion(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_voto_area, references: area(id) } }
+              - column: { name: valor, type: VARCHAR(5), constraints: { nullable: false } }
+        - sql:
+            sql: ALTER TABLE voto ADD CONSTRAINT ck_voto_valor CHECK (valor IN ('LIKE','NOPE'))
+        - createIndex:
+            tableName: voto
+            indexName: ix_voto_ciclo_proc_area
+            columns:
+              - column: { name: ciclo_id }
+              - column: { name: procedimiento_id }
+              - column: { name: area_id }

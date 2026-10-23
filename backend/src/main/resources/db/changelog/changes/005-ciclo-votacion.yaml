@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-ciclo-votacion
+      author: tinder
+      changes:
+        - createTable:
+            tableName: ciclo_votacion
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: nombre, type: VARCHAR(20), constraints: { nullable: false, unique: true, uniqueConstraintName: uk_ciclo_nombre } }
+              - column: { name: fecha_inicio, type: DATE, constraints: { nullable: false } }
+              - column: { name: fecha_fin, type: DATE, constraints: { nullable: false } }
+              - column: { name: estado, type: VARCHAR(10), constraints: { nullable: false } }
+        - sql:
+            sql: ALTER TABLE ciclo_votacion ADD CONSTRAINT ck_ciclo_estado CHECK (estado IN ('ABIERTO','CERRADO'))
+        # Solo puede haber UN ciclo ABIERTO a la vez
+        - sql:
+            sql: CREATE UNIQUE INDEX ux_ciclo_un_solo_abierto ON ciclo_votacion (estado) WHERE estado = 'ABIERTO'

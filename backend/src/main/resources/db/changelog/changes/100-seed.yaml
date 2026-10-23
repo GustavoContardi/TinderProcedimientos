@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 100-seed
+      author: tinder
+      comment: Datos de prueba para la demo. Contraseña de todos los usuarios = demo123
+      changes:
+        - sqlFile:
+            path: ../seed/seed.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+            encoding: UTF-8
