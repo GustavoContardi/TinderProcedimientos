@@ -1,111 +1,111 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../core/auth.service';
-import { mensajeDeError } from '../../core/notificador.service';
+import { Avatar, avatar } from '../../core/diseno';
+import { mensajeDeError } from '../../core/ui.service';
 
-const DEMO = [
-  { email: 'facundo@demo.com', etiqueta: 'Empleado (Desarrollo)' },
-  { email: 'ana@demo.com', etiqueta: 'Empleada (Operaciones)' },
-  { email: 'calidad@demo.com', etiqueta: 'Calidad' },
-  { email: 'direccion@demo.com', etiqueta: 'Dirección' },
+interface Demo {
+  email: string;
+  nombre: string;
+  etq: string;
+  av: Avatar;
+}
+
+/** Usuarios del seed (backend/src/main/resources/db/changelog/seed/seed.sql). Clave de todos: demo123. */
+const DEMOS: Demo[] = [
+  { email: 'facundo@demo.com', nombre: 'Facundo Ibarra', etq: 'Empleado · Desarrollo', av: avatar({ nombre: 'Facundo Ibarra', rol: 'EMPLEADO', areaId: 2 }) },
+  { email: 'ana@demo.com', nombre: 'Ana Paredes', etq: 'Empleada · Operaciones y Mesa de Ayuda', av: avatar({ nombre: 'Ana Paredes', rol: 'EMPLEADO', areaId: 1 }) },
+  { email: 'calidad@demo.com', nombre: 'Mónica Calderón', etq: 'Calidad · gestiona ciclos y ceremonias', av: avatar({ nombre: 'Mónica Calderón', rol: 'CALIDAD' }) },
+  { email: 'direccion@demo.com', nombre: 'Ricardo Ferreyra', etq: 'Dirección · oficia y firma actas', av: avatar({ nombre: 'Ricardo Ferreyra', rol: 'DIRECCION' }) },
 ];
+const CLAVE_DEMO = 'demo123';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [FormsModule],
   template: `
-    <div class="fondo">
-      <form class="caja" [formGroup]="form" (ngSubmit)="entrar()">
-        <div class="logo">💍</div>
-        <h1>Tinder de procedimientos</h1>
-        <p class="lema">Hasta que la burocracia nos separe</p>
+    <form class="login" (ngSubmit)="entrar(email, pass)">
+      <div class="anillos"></div>
+      <div class="kicker">Defensoría del Pueblo · ISO 9001</div>
+      <h1>Tinder de procedimientos</h1>
+      <p class="lema">Hasta que la burocracia nos separe</p>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="username" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="current-password" />
-        </mat-form-field>
-
+      <div class="campos">
+        <input type="email" name="email" placeholder="Email institucional" autocomplete="username" [(ngModel)]="email" />
+        <input type="password" name="pass" placeholder="Contraseña" autocomplete="current-password" [(ngModel)]="pass" />
         @if (error()) {
-          <p class="error">{{ error() }}</p>
+          <div class="error">{{ error() }}</div>
         }
+        <button type="submit" class="btn btn-petroleo entrar" [disabled]="cargando()">{{ cargando() ? 'Entrando…' : 'Entrar' }}</button>
+      </div>
 
-        <button mat-flat-button type="submit" class="entrar" [disabled]="form.invalid || cargando()">
-          {{ cargando() ? 'Entrando…' : 'Entrar' }}
-        </button>
-
-        <div class="demo">
-          <span>Usuarios de prueba (clave <code>demo123</code>):</span>
-          <div class="chips">
-            @for (d of demo; track d.email) {
-              <button type="button" (click)="usar(d.email)">{{ d.etiqueta }}</button>
-            }
-          </div>
-        </div>
-      </form>
-    </div>
+      <div class="separador"><span></span>Usuarios de prueba · clave {{ claveDemo }}<span></span></div>
+      <div class="demos">
+        @for (d of demos; track d.email) {
+          <button type="button" class="demo" (click)="entrar(d.email, claveDemo)" [disabled]="cargando()">
+            <span class="av" [style.background]="d.av.bg" [style.color]="d.av.color">{{ d.av.ini }}</span>
+            <span class="flex quien"><span class="n">{{ d.nombre }}</span><span class="e">{{ d.etq }}</span></span>
+            <span class="ms">arrow_forward</span>
+          </button>
+        }
+      </div>
+    </form>
   `,
   styles: `
-    .fondo {
-      min-height: 100vh; display: grid; place-items: center; padding: 16px; box-sizing: border-box;
-      background: radial-gradient(circle at 20% 10%, #1d4b54, var(--petroleo) 60%);
+    :host { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .login { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: 60px 26px 28px; }
+    .kicker { margin-top: 30px; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gris); }
+    h1 { margin: 10px 0 0; font-family: var(--serif); font-weight: 500; font-size: 46px; line-height: .98; letter-spacing: -.03em; color: var(--petroleo); }
+    .lema { margin: 12px 0 0; font-family: var(--serif); font-style: italic; font-size: 20px; color: #9A5B12; }
+    .campos { display: flex; flex-direction: column; gap: 10px; margin-top: 34px; }
+    input {
+      width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(18,52,59,.16);
+      background: var(--papel); color: var(--texto); outline: none; font-size: 15px;
     }
-    .caja {
-      width: 100%; max-width: 380px; background: var(--papel); border-radius: 20px;
-      padding: 28px 22px; box-shadow: 0 20px 50px rgba(0,0,0,.35); text-align: center;
+    input:focus { border-color: var(--petroleo); box-shadow: var(--foco); }
+    .error { font-size: 13.5px; color: var(--rechazo-txt); font-weight: 600; }
+    .entrar { font-size: 16px; }
+    .separador { display: flex; align-items: center; gap: 12px; margin: 30px 0 12px; font-size: 12px; color: var(--gris); }
+    .separador span { flex: 1; height: 1px; background: rgba(18,52,59,.12); }
+    .demos { display: flex; flex-direction: column; gap: 8px; }
+    .demo {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px;
+      border: 1px solid rgba(18,52,59,.09); background: var(--papel); cursor: pointer; text-align: left;
     }
-    .logo { font-size: 3.5rem; animation: latido 1.6s ease-in-out infinite; }
-    h1 { font-size: 1.6rem; margin-bottom: 0; }
-    .lema { font-family: var(--fuente-titulos); font-style: italic; color: var(--ambar); margin: 4px 0 20px; }
-    .entrar { width: 100%; height: 48px; font-size: 1.05rem; }
-    .error { color: var(--rechazo); font-weight: 700; margin: 0 0 12px; }
-    .demo { margin-top: 20px; font-size: .85rem; color: #5b6b6e; }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px; }
-    .chips button {
-      border: 1px solid #cfd8da; background: #fff; border-radius: 999px; padding: 6px 10px;
-      cursor: pointer; font: inherit; color: var(--petroleo);
-    }
-    .chips button:hover { border-color: var(--ambar); background: #fff7ea; }
-    @keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    .demo:hover { border-color: rgba(18,52,59,.3); }
+    .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; flex: none; }
+    .quien { display: flex; flex-direction: column; gap: 2px; }
+    .n { font-weight: 600; font-size: 15px; color: var(--petroleo); }
+    .e { font-size: 12.5px; color: var(--gris); }
+    .demo .ms { font-size: 20px; color: var(--gris-claro); }
   `,
 })
 export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  readonly demo = DEMO;
+  readonly demos = DEMOS;
+  readonly claveDemo = CLAVE_DEMO;
   readonly cargando = signal(false);
   readonly error = signal<string | null>(null);
-
-  readonly form = inject(FormBuilder).nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-  });
+  email = '';
+  pass = '';
 
   constructor() {
     if (this.auth.logueado()) {
-      this.router.navigate(['/swipe']);
+      this.router.navigate(['/votar']);
     }
   }
 
-  usar(email: string): void {
-    this.form.setValue({ email, password: 'demo123' });
-    this.error.set(null);
-  }
-
-  entrar(): void {
-    if (this.form.invalid) return;
-    const { email, password } = this.form.getRawValue();
+  entrar(email: string, pass: string): void {
+    if (!email.trim() || !pass) {
+      this.error.set('Completá email y contraseña (o elegí un usuario de prueba).');
+      return;
+    }
     this.cargando.set(true);
     this.error.set(null);
-    this.auth.login(email, password).subscribe({
-      next: () => this.router.navigate(['/swipe']),
+    this.auth.login(email, pass).subscribe({
+      next: () => this.router.navigate(['/votar']),
       error: (e) => {
         this.error.set(mensajeDeError(e));
         this.cargando.set(false);

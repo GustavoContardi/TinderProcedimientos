@@ -87,12 +87,12 @@ Extra: en **Aniversarios** (Calidad/Dirección) está PR-06, que cumple 6 meses 
 │       │   ├── application.yml
 │       │   └── db/changelog/        # Liquibase: master YAML, un changeset por tabla y uno de seed
 │       └── test/java/…              # JUnit 5
-└── frontend/                        # Angular 19 standalone · Angular Material · CDK
+└── frontend/                        # Angular 19 standalone · diseño mobile-first de Claude Design
     ├── package.json, angular.json, proxy.conf.json
     └── src/app/
-        ├── core/                    # AuthService, interceptor, guards, ApiService, modelos
-        ├── shared/                  # Barra de votos (CSS puro), chips de veredicto y estado
-        └── pages/                   # login, swipe, resultados, procedimientos, ciclos, casamientos, velorios, aniversarios
+        ├── core/                    # AuthService, interceptor, guards, ApiService, modelos, UiService (hojas, toast, match), diseno.ts (paleta y fechas)
+        ├── shared/                  # Visor de libreta / necrológica (imprimible, firma manteniendo apretado)
+        └── pages/                   # login, shell (cabecera + nav), votar, resultados, registro (casamientos, velorios, aniversarios), gestion (procedimientos, ciclos)
 ```
 
 ## API (prefijo `/api`)
@@ -141,7 +141,7 @@ Cuando algo era ambiguo se eligió lo más simple que respetara las reglas:
 
 1. **Enums como `VARCHAR` + `CHECK`** en lugar de tipos `ENUM` nativos de PostgreSQL: mapean directo con `@Enumerated(STRING)` y pasan `ddl-auto=validate` sin conversores.
 2. **Un solo ciclo abierto** con índice parcial único `ON ciclo_votacion(estado) WHERE estado = 'ABIERTO'` y además un chequeo en el servicio (409).
-3. **Calidad y Dirección tienen área** (Operaciones y Desarrollo) porque `/swipe` es para todos los roles y el mazo depende del área.
+3. **Calidad y Dirección tienen área** (Operaciones y Desarrollo) porque `/votar` es para todos los roles y el mazo depende del área.
 4. **Se evalúan al cierre** solo los procedimientos en EN_TINDER o SEGUNDA_CITA. Se guarda un resultado por cada una de sus áreas, aunque tenga 0 votos (queda QUORUM_INSUFICIENTE).
 5. **Sin quórum en ninguna área**: el procedimiento queda en su estado actual (EN_TINDER, o SEGUNDA_CITA si ya venía de una segunda cita), o sea, sigue en el mazo.
 6. **MATCH en un área y SEGUNDA_CITA en otra** (sin rechazo) → SEGUNDA_CITA por votos divididos, sin alerta. La alerta de "relación a distancia" se genera solo con MATCH y RECHAZO a la vez.

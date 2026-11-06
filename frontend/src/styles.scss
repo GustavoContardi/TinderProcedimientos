@@ -1,109 +1,266 @@
-@use '@angular/material' as mat;
-
-// Paleta del proyecto
+// Paleta y piezas compartidas del diseño "Tinder de procedimientos" (Claude Design).
 :root {
+  color-scheme: light;
   --petroleo: #12343b;
-  --petroleo-claro: #1d4b54;
   --ambar: #f2a541;
+  --ambar-tinta: #3d2600;
   --match: #2e7d73;
   --rechazo: #d0573f;
-  --gris: #8a9699;
-  --fondo: #f4f1ea;
-  --papel: #fffdf8;
+  --rechazo-txt: #b2432d;
+  --luto: #1a1f21;
+  --crema: #f5f0e6;
+  --papel: #fffcf6;
+  --escenario: #e7e0d2;
   --texto: #1f2a2c;
-  --fuente-titulos: Cambria, Georgia, 'Times New Roman', serif;
-  --fuente-cuerpo: Calibri, Carlito, Arial, Helvetica, sans-serif;
+  --texto-2: #3f4e51;
+  --gris: #5e6f72;
+  --gris-claro: #8a9699;
+  --anillo: 0 0 0 1px rgba(18, 52, 59, .06);
+  --serif: Newsreader, Cambria, Georgia, serif;
+  --sans: 'Instrument Sans', Calibri, Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --foco: 0 0 0 3px rgba(242, 165, 65, .35);
 }
 
-html {
-  color-scheme: light;
-  @include mat.theme((
-    color: (primary: mat.$cyan-palette, tertiary: mat.$orange-palette, theme-type: light),
-    typography: (plain-family: 'Calibri, Carlito, Arial, sans-serif', brand-family: 'Cambria, Georgia, serif'),
-    density: 0,
-  ));
-  // Forzamos los tokens principales a la paleta institucional
-  & {
-  --mat-sys-primary: #12343b;
-  --mat-sys-on-primary: #ffffff;
-  --mat-sys-primary-container: #cfe3e6;
-  --mat-sys-on-primary-container: #12343b;
-  --mat-sys-secondary-container: #fbe3bf;
-  --mat-sys-on-secondary-container: #4a3002;
-  --mat-sys-tertiary: #f2a541;
-  --mat-sys-surface: #fffdf8;
-  --mat-sys-surface-container-low: #fffdf8;
-  --mat-sys-surface-container: #fbf8f1;
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--escenario);
+  color: var(--texto);
+  font-family: var(--sans);
+  -webkit-tap-highlight-color: transparent;
+}
+input, textarea, button, select { font: inherit; }
+textarea { resize: none; }
+button { color: inherit; }
+::-webkit-scrollbar { width: 0; height: 0; }
+a { color: var(--match); }
+a:hover { color: var(--petroleo); }
+
+// Íconos (Material Symbols Rounded, por ligadura)
+.ms {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  display: inline-block;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+.ms.relleno { font-variation-settings: 'FILL' 1; }
+
+.serif { font-family: var(--serif); }
+.mono { font-family: var(--mono); }
+.flex { flex: 1; }
+
+// Dos anillos entrelazados (logo)
+.anillos {
+  position: relative;
+  flex: none;
+  --d: 44px;
+  --b: 3.5px;
+  --c1: var(--ambar);
+  --c2: var(--petroleo);
+  width: calc(var(--d) * 1.59);
+  height: var(--d);
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+  }
+  &::before { left: 0; border: var(--b) solid var(--c1); }
+  &::after { left: calc(var(--d) * .59); border: var(--b) solid var(--c2); }
+}
+
+// Pantallas con scroll
+.pantalla { flex: 1; overflow-y: auto; padding: 6px 18px 28px; }
+.titulo-pagina {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 30px;
+  letter-spacing: -.02em;
+  color: var(--petroleo);
+}
+.subtitulo { margin: 4px 0 16px; font-size: 13.5px; color: var(--gris); }
+.rotulo {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gris);
+  margin: 0 0 10px;
+}
+.lista { display: flex; flex-direction: column; gap: 10px; }
+.codigo { font-family: var(--mono); font-size: 11px; color: var(--gris); }
+.nombre-serif { font-family: var(--serif); font-size: 18px; line-height: 1.2; color: var(--petroleo); }
+
+.tarjeta { background: var(--papel); border-radius: 18px; box-shadow: var(--anillo); }
+
+.chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+// Fila de pastillas con scroll horizontal
+.pastillas { display: flex; gap: 8px; overflow-x: auto; margin: 0 -18px 16px; padding: 0 18px; }
+.pastilla {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(18, 52, 59, .14);
+  background: var(--papel);
+  color: var(--petroleo);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  &.on { background: var(--petroleo); color: var(--crema); border-color: var(--petroleo); }
+  &.chica { height: auto; padding: 8px 12px; font-size: 13px; white-space: normal; text-align: left; }
+}
+
+// Control segmentado
+.segmentado {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(18, 52, 59, .07);
+  margin-bottom: 18px;
+  button {
+    flex: 1;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gris);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    &.on { background: var(--papel); color: var(--petroleo); box-shadow: 0 1px 3px rgba(18, 52, 59, .12); }
   }
 }
 
-html, body { height: 100%; }
-
-body {
-  margin: 0;
-  background: var(--fondo);
-  color: var(--texto);
-  font-family: var(--fuente-cuerpo);
-  font-size: 16px;
-  -webkit-tap-highlight-color: transparent;
+// Formularios dentro de las hojas
+.form { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  > span:first-child {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gris);
+  }
+  input, textarea, select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(18, 52, 59, .16);
+    background: #fff;
+    outline: none;
+    font-size: 15px;
+    color: var(--texto);
+    &:focus { border-color: var(--petroleo); box-shadow: var(--foco); }
+  }
+  textarea { font-size: 14px; }
+  .poetico { font-family: var(--serif); font-style: italic; font-size: 16px; }
 }
-
-h1, h2, h3, h4 {
-  font-family: var(--fuente-titulos);
-  color: var(--petroleo);
-  margin: 0 0 .5rem;
+.dato-fijo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(18, 52, 59, .05);
+  font-size: 13.5px;
+  color: var(--texto-2);
+  .ms { font-size: 18px; color: var(--petroleo); }
+  strong { color: var(--petroleo); }
 }
+.titulo-hoja { font-family: var(--serif); font-size: 26px; line-height: 1.1; color: var(--petroleo); }
+.error-form { font-size: 13px; color: var(--rechazo-txt); font-weight: 600; }
 
-a { color: var(--match); }
-
-.pagina {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.pagina > header { margin-bottom: 16px; }
-.pagina > header p { margin: 0; color: #5b6b6e; }
-
-.tarjeta-blanca {
-  background: var(--papel);
+// Botones
+.btn {
+  border: none;
   border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(18, 52, 59, .08);
-  padding: 16px;
-  margin-bottom: 16px;
+  height: 52px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  &:active { transform: scale(.98); }
+  &:disabled { opacity: .6; cursor: default; transform: none; }
+}
+.btn-petroleo { background: var(--petroleo); color: var(--crema); }
+.btn-match { background: var(--match); color: var(--papel); }
+.btn-luto { background: var(--luto); color: var(--crema); }
+.btn-ambar { background: var(--ambar); color: var(--ambar-tinta); }
+.btn-texto { background: none; border: none; color: var(--gris); font-weight: 500; cursor: pointer; height: 44px; }
+.btn-chico {
+  align-self: flex-start;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  .ms { font-size: 18px; }
 }
 
-.fila { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.fila > * { flex: 1 1 200px; }
-.espaciador { flex: 1 1 auto; }
-.vacio { text-align: center; padding: 32px 16px; color: #5b6b6e; }
-.vacio .emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
-.mat-mdc-form-field { width: 100%; }
-
-// Chips de estado y veredicto
-.chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  border-radius: 999px; padding: 3px 10px;
-  font-size: .8rem; font-weight: 700; white-space: nowrap;
+// Estado vacío con borde punteado
+.vacio-punteado {
+  flex: 1;
+  margin: 0 18px;
+  border-radius: 28px;
+  border: 1.5px dashed rgba(18, 52, 59, .2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px 26px;
+  gap: 14px;
+  h2 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 26px; line-height: 1.12; color: var(--petroleo); text-wrap: balance; }
+  p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--gris); text-wrap: pretty; }
 }
-.veredicto-match { background: var(--match); color: #fff; }
-.veredicto-rechazo { background: var(--rechazo); color: #fff; }
-.veredicto-segunda { background: var(--ambar); color: #3d2600; }
-.veredicto-quorum { background: #d9dedf; color: #4a5658; }
-.estado-tinder { background: #fde6e1; color: #8a2f1d; }
-.estado-segunda { background: #fdeccd; color: #6b4300; }
-.estado-pend-casamiento { background: #d6ece9; color: #1d5a52; }
-.estado-casado { background: var(--match); color: #fff; }
-.estado-pend-velorio { background: #3b3b3b; color: #f2f2f2; }
-.estado-velado { background: #111; color: #bbb; }
+.vacio-italico { padding: 40px 20px; text-align: center; color: var(--gris); font-family: var(--serif); font-style: italic; font-size: 18px; }
 
-.snack-ok { --mdc-snackbar-container-color: var(--match); --mat-snack-bar-button-color: #fff; }
-.snack-error { --mdc-snackbar-container-color: var(--rechazo); --mat-snack-bar-button-color: #fff; }
-
-// Impresión: solo el documento
+// Impresión: solo el documento abierto (libreta o necrológica)
 @media print {
-  .no-print, app-root > header, nav.menu, footer.lema { display: none !important; }
-  body { background: #fff; }
-  .pagina { padding: 0; max-width: none; }
+  body * { visibility: hidden; }
+  [data-print], [data-print] * { visibility: visible; }
+  [data-print] { position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; }
+  // Que el marco del teléfono no recorte documentos largos
+  .escenario, .marco, app-documento .panel, app-documento .contenido {
+    display: block !important; position: static !important; overflow: visible !important;
+    height: auto !important; min-height: 0 !important; transform: none !important; padding: 0 !important;
+  }
 }

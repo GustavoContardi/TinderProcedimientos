@@ -15,6 +15,6 @@ export function rolGuard(...roles: Rol[]): CanActivateFn {
     if (!auth.logueado()) {
       return inject(Router).createUrlTree(['/login']);
     }
-    return auth.tieneRol(...roles) ? true : inject(Router).createUrlTree(['/swipe']);
+    return auth.tieneRol(...roles) ? true : inject(Router).createUrlTree(['/votar']);
   };
 }
