@@ -17,6 +17,10 @@ Los empleados votan **de forma anónima** qué procedimientos ISO 9001 les sirve
 
 Requisitos: **Docker**, **Java 21** y **Node 20+**.
 
+**Atajo:** `./levantar.sh` levanta todo (base + backend + frontend) y `./bajar.sh` lo baja. Con `--reset` cualquiera de los dos borra la base para que se recargue el seed. Los logs quedan en `.run/`. El script busca solo el JDK 21 aunque tu Java por defecto sea otro.
+
+A mano, paso a paso:
+
 ```bash
 docker compose up -d
 ```

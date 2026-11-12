@@ -9,3 +9,5 @@ frontend/.angular/
 .vscode/
 *.iml
 .DS_Store
+# Scripts levantar/bajar
+.run/
