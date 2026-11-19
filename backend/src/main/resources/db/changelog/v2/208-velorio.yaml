@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 208-velorio-acta
+      author: tinder-v2
+      comment: >
+        El acta de defunción deja trazabilidad: número, causa, herencia, lecciones, reencarnación y tres firmas
+        (juez de paz, Dirección y dueño). acta_firmada / firmado_por / fecha_firma se migran a la firma de la Dirección y se eliminan.
+      changes:
+        - renameColumn:
+            tableName: velorio
+            oldColumnName: causa_muerte
+            newColumnName: causa
+        - addColumn:
+            tableName: velorio
+            columns:
+              - column: { name: numero_acta, type: VARCHAR(20) }
+              - column: { name: herencia, type: TEXT }
+              - column: { name: lecciones, type: TEXT }
+              - column: { name: reencarnacion_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_velorio_reencarnacion, references: procedimiento(id) } }
+              - column: { name: sin_reemplazo_motivo, type: TEXT }
+              - column: { name: firma_juez_por, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_velorio_firma_juez, references: usuario(id) } }
+              - column: { name: firma_juez_fecha, type: TIMESTAMP }
+              - column: { name: firma_direccion_por, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_velorio_firma_direccion, references: usuario(id) } }
+              - column: { name: firma_direccion_fecha, type: TIMESTAMP }
+              - column: { name: firma_dueno_por, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_velorio_firma_dueno, references: usuario(id) } }
+              - column: { name: firma_dueno_fecha, type: TIMESTAMP }
+        - sql:
+            sql: >
+              UPDATE velorio v SET numero_acta = n.numero
+              FROM (SELECT id, LPAD(ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM fecha) ORDER BY fecha, id)::TEXT, 3, '0')
+                           || '/' || EXTRACT(YEAR FROM fecha)::INT AS numero
+                    FROM velorio) n
+              WHERE n.id = v.id
+        - sql:
+            sql: >
+              UPDATE velorio SET firma_direccion_por = firmado_por, firma_direccion_fecha = COALESCE(fecha_firma, CURRENT_TIMESTAMP)
+              WHERE acta_firmada AND firmado_por IS NOT NULL
+        # Las actas viejas no tenían reemplazo: queda constancia del motivo
+        - sql:
+            sql: >
+              UPDATE velorio SET sin_reemplazo_motivo = 'Acta anterior a la v2, no se registró reemplazo.'
+              WHERE reencarnacion_id IS NULL
+        - addNotNullConstraint:
+            tableName: velorio
+            columnName: numero_acta
+        - addUniqueConstraint:
+            tableName: velorio
+            columnNames: numero_acta
+            constraintName: uk_velorio_numero_acta
+        - dropColumn:
+            tableName: velorio
+            columns:
+              - column: { name: acta_firmada }
+              - column: { name: firmado_por }
+              - column: { name: fecha_firma }
+        - sql:
+            sql: ALTER TABLE velorio ADD CONSTRAINT ck_velorio_reemplazo CHECK (reencarnacion_id IS NOT NULL OR sin_reemplazo_motivo IS NOT NULL)

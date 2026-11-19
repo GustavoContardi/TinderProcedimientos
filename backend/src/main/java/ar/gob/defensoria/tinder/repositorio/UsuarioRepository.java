@@ -14,4 +14,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findByRolOrderByNombre(Rol rol);
 
     List<Usuario> findAllByOrderByNombre();
+
+    List<Usuario> findByAreaIdOrderByNombre(Long areaId);
 }

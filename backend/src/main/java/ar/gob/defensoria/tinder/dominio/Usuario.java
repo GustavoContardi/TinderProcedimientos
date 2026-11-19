@@ -44,5 +44,6 @@ public class Usuario {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
     public Area getArea() { return area; }
 }

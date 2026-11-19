@@ -26,16 +26,15 @@ public class TinderController {
     }
 
     @GetMapping("/mazo")
-    @Operation(summary = "Procedimientos de mi área que todavía no voté en el ciclo abierto (orden aleatorio)")
+    @Operation(summary = "Procedimientos de MI matriz que todavía no voté (ciclo trimestral y votaciones rápidas)")
     public List<PerfilDTO> mazo(@AuthenticationPrincipal UsuarioAutenticado usuario) {
         return tinder.mazo(usuario);
     }
 
     @PostMapping("/votos")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Votar de forma anónima (LIKE = me sirve, NOPE = me sobra). 409 si ya votó.")
-    public VotoResponse votar(@AuthenticationPrincipal UsuarioAutenticado usuario,
-                              @Valid @RequestBody VotoRequest req) {
-        return tinder.votar(usuario, req.procedimientoId(), req.valor());
+    @Operation(summary = "Votar anónimo (LIKE / NOPE, objeción opcional solo con NOPE). 403 fuera de la matriz, 409 si ya votó.")
+    public VotoResponse votar(@AuthenticationPrincipal UsuarioAutenticado usuario, @Valid @RequestBody VotoRequest req) {
+        return tinder.votar(usuario, req);
     }
 }

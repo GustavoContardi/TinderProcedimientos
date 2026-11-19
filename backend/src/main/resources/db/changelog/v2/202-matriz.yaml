@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 202-voto-emitido
+      author: tinder-v2
+      comment: La tabla que registra QUIÉN votó (nunca qué) se renombra a voto_emitido.
+      changes:
+        - renameTable:
+            oldTableName: participacion
+            newTableName: voto_emitido
+        - sql:
+            sql: ALTER TABLE voto_emitido RENAME CONSTRAINT pk_participacion TO pk_voto_emitido
+        - sql:
+            sql: ALTER TABLE voto_emitido RENAME CONSTRAINT fk_participacion_usuario TO fk_voto_emitido_usuario
+        - sql:
+            sql: ALTER TABLE voto_emitido RENAME CONSTRAINT fk_participacion_proc TO fk_voto_emitido_proc
+        - sql:
+            sql: ALTER TABLE voto_emitido RENAME CONSTRAINT fk_participacion_ciclo TO fk_voto_emitido_ciclo
+
+  - changeSet:
+      id: 202-matriz-participacion
+      author: tinder-v2
+      comment: >
+        Matriz de participación. Cada fila significa "este usuario usa o ejecuta este procedimiento":
+        cada empleado vota solo lo que está en su matriz.
+      changes:
+        - createTable:
+            tableName: matriz_participacion
+            columns:
+              - column: { name: usuario_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_matriz_usuario, references: usuario(id) } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_matriz_proc, references: procedimiento(id) } }
+              - column: { name: alta, type: DATE, defaultValueComputed: CURRENT_DATE, constraints: { nullable: false } }
+        - addPrimaryKey:
+            tableName: matriz_participacion
+            columnNames: usuario_id, procedimiento_id
+            constraintName: pk_matriz_participacion
+        - createIndex:
+            tableName: matriz_participacion
+            indexName: ix_matriz_proc
+            columns:
+              - column: { name: procedimiento_id }
+        # Migración inicial = la regla vieja: todos los usuarios de cada área asociada al procedimiento
+        - sql:
+            sql: >
+              INSERT INTO matriz_participacion (usuario_id, procedimiento_id, alta)
+              SELECT DISTINCT u.id, pa.procedimiento_id, CURRENT_DATE
+              FROM usuario u JOIN procedimiento_area pa ON pa.area_id = u.area_id
+
+  - changeSet:
+      id: 202-matriz-revision
+      author: tinder-v2
+      comment: Bitácora de revisiones de la matriz (la usa el calendario del juez de paz).
+      changes:
+        - createTable:
+            tableName: matriz_revision
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: fecha, type: DATE, constraints: { nullable: false } }
+              - column: { name: usuario_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_matriz_rev_usuario, references: usuario(id) } }
+              - column: { name: altas, type: INT, constraints: { nullable: false } }
+              - column: { name: bajas, type: INT, constraints: { nullable: false } }

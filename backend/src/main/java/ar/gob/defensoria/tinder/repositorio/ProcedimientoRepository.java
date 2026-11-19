@@ -11,27 +11,38 @@ import java.util.List;
 
 public interface ProcedimientoRepository extends JpaRepository<Procedimiento, Long> {
 
-    List<Procedimiento> findAllByOrderByCodigo();
+    List<Procedimiento> findByEstadoNotOrderByCodigo(EstadoProcedimiento estado);
 
     List<Procedimiento> findByEstadoOrderByCodigo(EstadoProcedimiento estado);
 
     List<Procedimiento> findByEstadoIn(Collection<EstadoProcedimiento> estados);
 
+    List<Procedimiento> findByDuenoIdOrderByCodigo(Long duenoId);
+
+    long countByEstado(EstadoProcedimiento estado);
+
     boolean existsByCodigoIgnoreCase(String codigo);
 
-    /** Mazo: procedimientos del área, en estados votables, que el usuario todavía no votó en el ciclo. */
+    /**
+     * Mazo trimestral: procedimientos de la MATRIZ del usuario, en estados votables, que todavía no votó en el ciclo
+     * y que no tienen una votación rápida abierta (esos se votan en su propio ciclo).
+     */
     @Query("""
-            select distinct p from Procedimiento p join p.areas a
-            where a.id = :areaId
-              and p.estado in :estados
+            select p from Procedimiento p
+            where p.estado in :estados
+              and exists (
+                  select 1 from MatrizParticipacion m
+                  where m.id.usuarioId = :usuarioId and m.id.procedimientoId = p.id)
               and not exists (
-                  select 1 from Participacion pa
-                  where pa.id.usuarioId = :usuarioId
-                    and pa.id.procedimientoId = p.id
-                    and pa.id.cicloId = :cicloId)
+                  select 1 from VotoEmitido ve
+                  where ve.id.usuarioId = :usuarioId
+                    and ve.id.procedimientoId = p.id
+                    and ve.id.cicloId = :cicloId)
+              and not exists (
+                  select 1 from CicloVotacion c
+                  where c.procedimiento = p and c.estado = ar.gob.defensoria.tinder.dominio.EstadoCiclo.ABIERTO)
             """)
-    List<Procedimiento> findMazo(@Param("areaId") Long areaId,
-                                 @Param("usuarioId") Long usuarioId,
+    List<Procedimiento> findMazo(@Param("usuarioId") Long usuarioId,
                                  @Param("cicloId") Long cicloId,
                                  @Param("estados") Collection<EstadoProcedimiento> estados);
 }

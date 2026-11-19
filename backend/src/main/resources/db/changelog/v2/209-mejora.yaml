@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 209-mejora
+      author: tinder-v2
+      comment: >
+        Tablero de mejoras: toda objeción, acuerdo y acta genera acciones con responsable y fecha.
+        origen_id es texto porque puede apuntar a una objeción (UUID) o a una segunda cita, acta o casamiento (BIGINT).
+      changes:
+        - sql:
+            sql: CREATE SEQUENCE mejora_codigo_seq START WITH 1 INCREMENT BY 1
+        - createTable:
+            tableName: mejora
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: codigo, type: VARCHAR(12), constraints: { nullable: false, unique: true, uniqueConstraintName: uk_mejora_codigo } }
+              - column: { name: origen, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: origen_id, type: VARCHAR(40) }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_mejora_proc, references: procedimiento(id) } }
+              - column: { name: descripcion, type: TEXT, constraints: { nullable: false } }
+              - column: { name: responsable_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_mejora_responsable, references: usuario(id) } }
+              - column: { name: fecha_compromiso, type: DATE, constraints: { nullable: false } }
+              - column: { name: estado, type: VARCHAR(12), defaultValue: NUEVA, constraints: { nullable: false } }
+              - column: { name: respuesta, type: TEXT }
+        - sql:
+            sql: >
+              ALTER TABLE mejora
+                ADD CONSTRAINT ck_mejora_origen CHECK (origen IN ('OBJECION','SEGUNDA_CITA','ACTA_DEFUNCION','ANIVERSARIO','REFORMULACION')),
+                ADD CONSTRAINT ck_mejora_estado CHECK (estado IN ('NUEVA','EN_ANALISIS','EN_CURSO','RESUELTA','DESCARTADA')),
+                ADD CONSTRAINT ck_mejora_cierre CHECK (estado NOT IN ('RESUELTA','DESCARTADA') OR (respuesta IS NOT NULL AND respuesta <> ''))

@@ -1,13 +1,15 @@
 package ar.gob.defensoria.tinder.web;
 
+import ar.gob.defensoria.tinder.config.UsuarioAutenticado;
 import ar.gob.defensoria.tinder.servicio.CasamientoService;
-import ar.gob.defensoria.tinder.web.dto.CasamientoDTO;
-import ar.gob.defensoria.tinder.web.dto.CasamientoRequest;
+import ar.gob.defensoria.tinder.servicio.ObjecionService;
+import ar.gob.defensoria.tinder.web.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,15 +20,17 @@ import java.util.List;
 public class CasamientoController {
 
     private final CasamientoService casamientos;
+    private final ObjecionService objeciones;
 
-    public CasamientoController(CasamientoService casamientos) {
+    public CasamientoController(CasamientoService casamientos, ObjecionService objeciones) {
         this.casamientos = casamientos;
+        this.objeciones = objeciones;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('CALIDAD')")
-    @Operation(summary = "Registrar casamiento (grupal si son 2 o más áreas). Oficia alguien de la Dirección.")
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    @Operation(summary = "Registrar casamiento (oficia el juez de paz; grupal si son 2 o más áreas)")
     public CasamientoDTO casar(@Valid @RequestBody CasamientoRequest req) {
         return casamientos.casar(req);
     }
@@ -37,9 +41,9 @@ public class CasamientoController {
     }
 
     @GetMapping("/aniversarios")
-    @PreAuthorize("hasAnyRole('CALIDAD','DIRECCION')")
-    @Operation(summary = "Casamientos vigentes con aniversario en los próximos 15 días (o vencido)")
-    public List<CasamientoDTO> aniversarios() {
+    @PreAuthorize("hasAnyRole('JUEZ_PAZ','DIRECCION')")
+    @Operation(summary = "Informe de los casamientos con aniversario en los próximos 15 días (o vencido)")
+    public List<AniversarioDTO> aniversarios() {
         return casamientos.aniversarios();
     }
 
@@ -48,15 +52,30 @@ public class CasamientoController {
         return casamientos.obtener(id);
     }
 
+    @PostMapping("/{id}/objeciones")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "¿Alguien se opone? Objeción anónima de boda (o de aniversario si ya está cerca)")
+    public ObjecionRecibidaDTO objetar(@PathVariable Long id, @Valid @RequestBody ObjecionRequest req,
+                                       @AuthenticationPrincipal UsuarioAutenticado usuario) {
+        return objeciones.objetarCasamiento(id, req, usuario);
+    }
+
     @PostMapping("/{id}/renovar")
-    @PreAuthorize("hasAnyRole('CALIDAD','DIRECCION')")
-    public CasamientoDTO renovar(@PathVariable Long id) {
-        return casamientos.renovar(id);
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    public CasamientoDTO renovar(@PathVariable Long id, @Valid @RequestBody(required = false) AccionAniversarioRequest req) {
+        return casamientos.renovar(id, req != null ? req.usoReal() : null);
+    }
+
+    @PostMapping("/{id}/segunda-cita")
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    public CasamientoDTO segundaCita(@PathVariable Long id, @Valid @RequestBody(required = false) AccionAniversarioRequest req,
+                                     @AuthenticationPrincipal UsuarioAutenticado juez) {
+        return casamientos.segundaCita(id, req != null ? req.usoReal() : null, juez);
     }
 
     @PostMapping("/{id}/divorciar")
-    @PreAuthorize("hasAnyRole('CALIDAD','DIRECCION')")
-    public CasamientoDTO divorciar(@PathVariable Long id) {
-        return casamientos.divorciar(id);
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    public CasamientoDTO divorciar(@PathVariable Long id, @Valid @RequestBody(required = false) AccionAniversarioRequest req) {
+        return casamientos.divorciar(id, req != null ? req.usoReal() : null);
     }
 }

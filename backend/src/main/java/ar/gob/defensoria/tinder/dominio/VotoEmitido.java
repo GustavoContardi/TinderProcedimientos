@@ -7,34 +7,34 @@ import java.io.Serializable;
 
 /**
  * Registra QUIÉN votó un procedimiento en un ciclo (para impedir el doble voto),
- * pero NUNCA qué votó. No tiene relación alguna con {@link Voto}.
+ * pero NUNCA qué votó. No tiene relación alguna con {@link Voto} ni con {@link Objecion}.
  */
 @Entity
-@Table(name = "participacion")
-public class Participacion implements Persistable<Participacion.Id> {
+@Table(name = "voto_emitido")
+public class VotoEmitido implements Persistable<VotoEmitido.Id> {
 
     @EmbeddedId
     private Id id;
 
     /** Siempre se inserta (persist), nunca se hace merge: así un doble voto choca contra la PK. */
     @Transient
-    private boolean nueva = true;
+    private boolean nuevo = true;
 
     @PostLoad
     @PostPersist
     void marcarExistente() {
-        nueva = false;
+        nuevo = false;
     }
 
     @Override
     public boolean isNew() {
-        return nueva;
+        return nuevo;
     }
 
-    protected Participacion() {
+    protected VotoEmitido() {
     }
 
-    public Participacion(Long usuarioId, Long procedimientoId, Long cicloId) {
+    public VotoEmitido(Long usuarioId, Long procedimientoId, Long cicloId) {
         this.id = new Id(usuarioId, procedimientoId, cicloId);
     }
 

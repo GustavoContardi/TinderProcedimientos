@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Levanta todo: PostgreSQL (Docker) + backend (Spring Boot) + frontend (Angular).
-# Uso: ./levantar.sh           -> levanta todo
+# Uso: ./levantar.sh           -> levanta todo (perfil "demo": carga el seed v2 la primera vez)
 #      ./levantar.sh --reset   -> borra la base y la vuelve a cargar con el seed
 # Logs en .run/backend.log y .run/frontend.log. Para bajar todo: ./bajar.sh
 set -euo pipefail
@@ -65,7 +65,7 @@ elif puerto_ocupado 8080; then
 else
   JAVA21="$(buscar_java21)" || { error "No encontré un JDK 21. Instalalo: brew install openjdk@21"; exit 1; }
   info "Levantando backend (JDK: $JAVA21)"
-  ( cd backend && JAVA_HOME="$JAVA21" exec nohup ./mvnw -q spring-boot:run ) < /dev/null > "$RUN/backend.log" 2>&1 &
+  ( cd backend && JAVA_HOME="$JAVA21" exec nohup ./mvnw -q spring-boot:run -Dspring-boot.run.profiles=demo ) < /dev/null > "$RUN/backend.log" 2>&1 &
   echo $! > "$RUN/backend.pid"
 fi
 

@@ -22,7 +22,15 @@ public record ProcedimientoDTO(
         String baseObligatoriedad,
         Long autorId,
         String padrinoNombre,
+        Long duenoId,
+        String duenoNombre,
+        int version,
         String versionExpress,
         EstadoProcedimiento estado,
+        Long reemplazaAId,
+        String reemplazaACodigo,
+        int segundasCitasConsecutivas,
+        boolean requiereReformulacion,
+        boolean editablePorDueno,
         List<AreaDTO> areas) {
 }

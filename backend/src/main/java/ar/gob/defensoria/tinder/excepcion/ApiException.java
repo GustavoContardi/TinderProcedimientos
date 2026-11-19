@@ -26,6 +26,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, codigo, mensaje);
     }
 
+    public static ApiException pedidoInvalido(String codigo, String mensaje) {
+        return new ApiException(HttpStatus.BAD_REQUEST, codigo, mensaje);
+    }
+
     public static ApiException prohibido(String mensaje) {
         return new ApiException(HttpStatus.FORBIDDEN, "PROHIBIDO", mensaje);
     }

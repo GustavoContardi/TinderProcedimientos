@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 204-ciclo-tipo
+      author: tinder-v2
+      comment: Ciclos TRIMESTRAL (el Tinder de siempre) y RAPIDA (votación de 7 días de un solo procedimiento, tras una segunda cita).
+      changes:
+        - addColumn:
+            tableName: ciclo_votacion
+            columns:
+              - column: { name: tipo, type: VARCHAR(10), defaultValue: TRIMESTRAL, constraints: { nullable: false } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_ciclo_procedimiento, references: procedimiento(id) } }
+        - modifyDataType:
+            tableName: ciclo_votacion
+            columnName: nombre
+            newDataType: VARCHAR(40)
+        - sql:
+            sql: >
+              ALTER TABLE ciclo_votacion
+                ADD CONSTRAINT ck_ciclo_tipo CHECK (tipo IN ('TRIMESTRAL','RAPIDA')),
+                ADD CONSTRAINT ck_ciclo_rapida_proc CHECK ((tipo = 'RAPIDA') = (procedimiento_id IS NOT NULL))
+        # La regla "un único ciclo ABIERTO" aplica solo a los trimestrales
+        - sql:
+            sql: DROP INDEX ux_ciclo_un_solo_abierto
+        - sql:
+            sql: CREATE UNIQUE INDEX ux_ciclo_un_solo_abierto ON ciclo_votacion (estado) WHERE estado = 'ABIERTO' AND tipo = 'TRIMESTRAL'
+        - sql:
+            sql: CREATE UNIQUE INDEX ux_ciclo_rapida_abierta_por_proc ON ciclo_votacion (procedimiento_id) WHERE estado = 'ABIERTO' AND tipo = 'RAPIDA'

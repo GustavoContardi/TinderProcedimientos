@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 300-seed-demo-v2
+      author: tinder-v2
+      context: demo
+      comment: >
+        Seed de la demo v2 (solo con el perfil "demo", contexto Liquibase demo). Vacía todas las tablas y carga
+        usuarios, matriz, ciclos 2026-T1/T2/T3 cerrados y 2026-T4 abierto. Contraseña de todos = demo123.
+        Votos y objeciones van sin usuario y sin timestamp.
+      changes:
+        - sqlFile:
+            path: seed-demo.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+            encoding: UTF-8

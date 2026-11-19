@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/alertas")
-@Tag(name = "Alertas", description = "Relaciones a distancia y otros dramas para que Calidad revise")
+@Tag(name = "Alertas", description = "Relaciones a distancia y otros dramas para que el juez de paz revise")
 public class AlertaController {
 
     private final AlertaService alertas;
@@ -20,13 +20,13 @@ public class AlertaController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('CALIDAD','DIRECCION')")
+    @PreAuthorize("hasAnyRole('JUEZ_PAZ','DIRECCION')")
     public List<AlertaDTO> listar() {
         return alertas.listar();
     }
 
     @PostMapping("/{id}/revisar")
-    @PreAuthorize("hasRole('CALIDAD')")
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
     public AlertaDTO revisar(@PathVariable Long id) {
         return alertas.revisar(id);
     }

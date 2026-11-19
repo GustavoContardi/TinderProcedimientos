@@ -1,5 +1,6 @@
 import { Component, OnInit, TemplateRef, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import {
@@ -13,7 +14,7 @@ import {
   iconoTipo,
   siguienteTrimestre,
 } from '../../core/diseno';
-import { Alerta, Area, Ciclo, EstadoProcedimiento, Procedimiento, ResumenCierre, TipoProcedimiento } from '../../core/models';
+import { Alerta, Area, Ciclo, EstadoProcedimiento, Procedimiento, ResumenCierre, TipoProcedimiento, Usuario } from '../../core/models';
 import { UiService, mensajeDeError } from '../../core/ui.service';
 
 type Filtro = EstadoProcedimiento | 'TODOS';
@@ -32,14 +33,16 @@ interface FormProc {
   areaIds: number[];
   fechaCreacion: string;
   autorId: number | null;
+  duenoId: number | null;
   versionExpress: string | null;
 }
 
 @Component({
   selector: 'app-gestion',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     <div class="pantalla">
+      <a class="volver" routerLink="/juez-de-paz"><span class="ms">arrow_back</span>Juez de paz</a>
       <div class="segmentado">
         <button [class.on]="pestania() === 'procedimientos'" (click)="pestania.set('procedimientos')">Procedimientos</button>
         <button [class.on]="pestania() === 'ciclos'" (click)="pestania.set('ciclos')">Ciclos</button>
@@ -65,6 +68,7 @@ interface FormProc {
               <div class="fila" style="gap: 6px"><span class="codigo flex">{{ p.codigo }}</span><span class="ms tipo">{{ iconoTipo(p.tipo) }}</span></div>
               <div class="nombre-proc flex">{{ p.nombre }}</div>
               <span class="chip" style="align-self: flex-start" [style.background]="estados[p.estado][1]" [style.color]="estados[p.estado][2]">{{ estados[p.estado][0] }}</span>
+              @if (p.requiereReformulacion) { <span class="chip" style="align-self: flex-start; background: #F8E1DB; color: #8A2F1D">Reformular</span> }
               <div class="fila meta" style="gap: 4px">
                 <span class="flex">{{ p.minutosPorUso }} min · {{ p.areas.length }} {{ p.areas.length === 1 ? 'área' : 'áreas' }}</span>
                 @if (p.obligatorio) { <span class="ms" style="font-size: 15px; color: #9A5B12" title="Obligatorio por norma">gavel</span> }
@@ -119,7 +123,7 @@ interface FormProc {
           </div>
         }
 
-        <div class="rotulo" style="margin: 26px 0 10px">Alertas para Calidad</div>
+        <div class="rotulo" style="margin: 26px 0 10px">Alertas para el juez de paz</div>
         <div class="lista">
           @for (a of alertas(); track a.id) {
             <div class="tarjeta alerta" [style.opacity]="a.revisada ? .6 : 1">
@@ -136,7 +140,7 @@ interface FormProc {
               </div>
             </div>
           } @empty {
-            <div class="meta">Sin alertas. Calidad puede tomarse un café.</div>
+            <div class="meta">Sin alertas. El juez de paz puede tomarse un café.</div>
           }
         </div>
 
@@ -145,7 +149,10 @@ interface FormProc {
           @for (h of historial(); track h.id) {
             <div class="renglon fila" style="gap: 10px; padding: 13px 16px; font-size: 13.5px">
               <strong class="hist-nombre">{{ h.nombre }}</strong>
-              <span class="flex" style="color: var(--gris)">{{ rangoCorto(h) }}</span>
+              <span class="flex" style="color: var(--gris)">{{ rangoCorto(h) }}{{ h.tipo === 'RAPIDA' ? ' · rápida' : '' }}</span>
+              @if (h.tipo === 'RAPIDA' && h.estado === 'ABIERTO') {
+                <button class="marcar" style="margin: 0" (click)="cerrarCiclo(h)" [disabled]="ocupado()">Cerrar</button>
+              }
               <span class="chip" [style.background]="h.estado === 'ABIERTO' ? '#2E7D73' : '#E3E1DC'" [style.color]="h.estado === 'ABIERTO' ? '#fff' : '#4F5958'">
                 {{ h.estado === 'ABIERTO' ? 'Abierto' : 'Cerrado' }}
               </span>
@@ -205,12 +212,31 @@ interface FormProc {
         @if (fp.oblig) {
           <label class="campo"><span>Base normativa</span><input [(ngModel)]="fp.base" placeholder="ISO 9001 7.5.3" /></label>
         }
+        <div class="dos">
+          <label class="campo">
+            <span>Dueño (contenido)</span>
+            <select [(ngModel)]="fp.duenoId">
+              <option [ngValue]="null">Sin dueño</option>
+              @for (u of personas(); track u.id) { <option [ngValue]="u.id">{{ u.nombre }}</option> }
+            </select>
+          </label>
+          <label class="campo">
+            <span>Padrino (autor)</span>
+            <select [(ngModel)]="fp.autorId">
+              <option [ngValue]="null">Nadie</option>
+              @for (u of personas(); track u.id) { <option [ngValue]="u.id">{{ u.nombre }}</option> }
+            </select>
+          </label>
+        </div>
         @if (errorProc()) {
           <div class="error-form">{{ errorProc() }}</div>
         }
         <button class="btn btn-petroleo" (click)="guardarProc()" [disabled]="ocupado()">
           {{ ocupado() ? 'Guardando…' : fp.id ? 'Guardar cambios' : 'Publicar en Tinder' }}
         </button>
+        @if (fp.id && fpEstado === 'BORRADOR') {
+          <button class="btn btn-ambar" (click)="publicar()" [disabled]="ocupado()">Publicar el borrador en el Tinder</button>
+        }
         @if (fp.id) {
           <button class="btn-texto" style="color: var(--rechazo-txt)" (click)="borrarProc()" [disabled]="ocupado()">
             {{ confirmarBorrado() ? '¿Seguro? Tocá de nuevo para borrarlo' : 'Borrar procedimiento' }}
@@ -244,6 +270,8 @@ interface FormProc {
     .ciclo-rango { font-size: 13.5px; color: rgba(245,240,230,.75); margin-top: 6px; }
     .pista { height: 6px; border-radius: 4px; background: rgba(245,240,230,.15); overflow: hidden; }
     .pista > div { height: 100%; background: var(--ambar); border-radius: 4px; }
+    .volver { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: var(--petroleo); text-decoration: none; }
+    .volver .ms { font-size: 18px; }
     .ciclo-cerrado { padding: 20px; border-radius: 24px; border: 1.5px dashed rgba(18,52,59,.22); display: flex; flex-direction: column; gap: 12px; }
 
     .tabla { overflow: hidden; }
@@ -281,7 +309,7 @@ export class GestionComponent implements OnInit {
   readonly ui = inject(UiService);
 
   readonly estados = ESTADOS;
-  readonly filtros: Filtro[] = ['TODOS', ...ESTADOS_LISTA];
+  readonly filtros: Filtro[] = ['TODOS', ...ESTADOS_LISTA.filter((e) => e !== 'VELADO')];
   readonly iconoTipo = iconoTipo;
 
   readonly pestania = signal<'procedimientos' | 'ciclos'>('procedimientos');
@@ -295,6 +323,8 @@ export class GestionComponent implements OnInit {
   readonly errorProc = signal<string | null>(null);
   readonly confirmarBorrado = signal(false);
   fp: FormProc = vacio(null);
+  fpEstado: EstadoProcedimiento | null = null;
+  readonly personas = signal<Usuario[]>([]);
 
   readonly visibles = computed(() => {
     const f = this.filtro();
@@ -315,6 +345,7 @@ export class GestionComponent implements OnInit {
     this.cargarProcedimientos();
     this.cargarCiclos();
     this.api.areas().subscribe((a) => this.areas.set(a));
+    this.api.usuarios().subscribe((u) => this.personas.set(u.filter((x) => x.rol !== 'DIRECCION')));
   }
 
   private cargarProcedimientos(): void {
@@ -357,7 +388,7 @@ export class GestionComponent implements OnInit {
         this.ocupado.set(false);
         this.ui.cerrarHoja();
         this.resumen.set(r);
-        this.ui.ok(`Ciclo cerrado: ${r.resultadosCalculados} resultados por área calculados`);
+        this.ui.ok(`${r.ciclo.nombre} cerrado: ${r.resultadosCalculados} resultados por área calculados`);
         this.ui.recargarCiclo();
         this.ui.avisarCambio();
         this.cargarCiclos();
@@ -399,6 +430,7 @@ export class GestionComponent implements OnInit {
 
   nuevo(hoja: TemplateRef<unknown>): void {
     this.fp = vacio(this.auth.usuario()?.id ?? null);
+    this.fpEstado = null;
     this.errorProc.set(null);
     this.confirmarBorrado.set(false);
     this.ui.abrirHoja(hoja);
@@ -419,8 +451,10 @@ export class GestionComponent implements OnInit {
       areaIds: p.areas.map((a) => a.id),
       fechaCreacion: p.fechaCreacion,
       autorId: p.autorId,
+      duenoId: p.duenoId,
       versionExpress: p.versionExpress,
     };
+    this.fpEstado = p.estado;
     this.errorProc.set(null);
     this.confirmarBorrado.set(false);
     this.ui.abrirHoja(hoja);
@@ -453,6 +487,7 @@ export class GestionComponent implements OnInit {
       obligatorio: f.oblig,
       baseObligatoriedad: f.oblig ? f.base.trim() || null : null,
       autorId: f.autorId,
+      duenoId: f.duenoId,
       versionExpress: f.versionExpress,
       areaIds: f.areaIds,
     };
@@ -465,6 +500,24 @@ export class GestionComponent implements OnInit {
         this.ui.cerrarHoja();
         this.ui.ok(f.id ? `Perfil de ${p.codigo} actualizado` : `${p.codigo} ya está en Tinder`);
         if (!f.id) this.filtro.set('TODOS');
+        this.cargarProcedimientos();
+      },
+      error: (e) => {
+        this.ocupado.set(false);
+        this.errorProc.set(mensajeDeError(e));
+      },
+    });
+  }
+
+  publicar(): void {
+    const id = this.fp.id;
+    if (!id) return;
+    this.ocupado.set(true);
+    this.api.publicar(id).subscribe({
+      next: (p) => {
+        this.ocupado.set(false);
+        this.ui.cerrarHoja();
+        this.ui.ok(`${p.codigo} salió del borrador: ya está en el Tinder`);
         this.cargarProcedimientos();
       },
       error: (e) => {
@@ -513,6 +566,7 @@ function vacio(autorId: number | null): FormProc {
     areaIds: [],
     fechaCreacion: hoyIso(),
     autorId,
+    duenoId: autorId,
     versionExpress: null,
   };
 }

@@ -36,10 +36,12 @@ public class CatalogoController {
     }
 
     @GetMapping("/usuarios")
-    @PreAuthorize("hasAnyRole('CALIDAD','DIRECCION')")
+    @PreAuthorize("hasAnyRole('JUEZ_PAZ','DIRECCION')")
     @Transactional(readOnly = true)
-    public List<UsuarioDTO> usuarios(@RequestParam(required = false) Rol rol) {
+    public List<UsuarioDTO> usuarios(@RequestParam(required = false) Rol rol, @RequestParam(required = false) Long areaId) {
         var lista = rol == null ? usuarios.findAllByOrderByNombre() : usuarios.findByRolOrderByNombre(rol);
-        return lista.stream().map(UsuarioDTO::de).toList();
+        return lista.stream()
+                .filter(u -> areaId == null || u.getArea().getId().equals(areaId))
+                .map(UsuarioDTO::de).toList();
     }
 }

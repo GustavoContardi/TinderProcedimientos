@@ -1,0 +1,5 @@
+# Perfil de demo: además de las migraciones corre el seed v2 (changelog/v2/300-seed-demo.yaml),
+# que vacía la base y carga los datos del guion. Uso: ./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+spring:
+  liquibase:
+    contexts: base,demo

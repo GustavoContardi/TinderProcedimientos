@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 201-procedimiento-v2
+      author: tinder-v2
+      comment: Dueño (responsable del contenido), versión, reencarnación, contador de segundas citas y estado BORRADOR.
+      changes:
+        - addColumn:
+            tableName: procedimiento
+            columns:
+              - column: { name: dueno_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_procedimiento_dueno, references: usuario(id) } }
+              - column: { name: version, type: INT, defaultValueNumeric: 1, constraints: { nullable: false } }
+              - column: { name: reemplaza_a_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_procedimiento_reemplaza, references: procedimiento(id) } }
+              - column: { name: segundas_citas_consecutivas, type: INT, defaultValueNumeric: 0, constraints: { nullable: false } }
+              - column: { name: requiere_reformulacion, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+        # Migración: hasta que el juez de paz lo cambie, el dueño es el autor (padrino)
+        - sql:
+            sql: UPDATE procedimiento SET dueno_id = autor_id WHERE dueno_id IS NULL
+        - sql:
+            sql: ALTER TABLE procedimiento DROP CONSTRAINT ck_procedimiento_estado
+        - sql:
+            sql: >
+              ALTER TABLE procedimiento ADD CONSTRAINT ck_procedimiento_estado CHECK (estado IN
+                ('BORRADOR','EN_TINDER','SEGUNDA_CITA','PENDIENTE_CASAMIENTO','CASADO','PENDIENTE_VELORIO','VELADO'))
+        - sql:
+            sql: ALTER TABLE procedimiento ADD CONSTRAINT ck_procedimiento_version CHECK (version >= 1 AND segundas_citas_consecutivas >= 0)

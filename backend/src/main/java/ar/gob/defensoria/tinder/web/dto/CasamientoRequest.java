@@ -11,7 +11,10 @@ public record CasamientoRequest(
         LocalDate fecha,
         @NotBlank(message = "Sin votos no hay casamiento") String votos,
         @NotBlank(message = "Falta el acuerdo prenupcial (versión express)") String versionExpress,
-        @NotNull(message = "Falta el oficiante (de la Dirección)") Long oficianteId,
+        @NotNull(message = "Falta el oficiante (el juez de paz)") Long oficianteId,
         Long padrinoId,
+        Long duenoId,
+        Set<Long> testigoIds,
+        String condiciones,
         Set<Long> areaIds) {
 }

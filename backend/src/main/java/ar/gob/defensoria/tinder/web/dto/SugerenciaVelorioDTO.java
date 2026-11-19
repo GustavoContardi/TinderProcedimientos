@@ -1,11 +1,14 @@
 package ar.gob.defensoria.tinder.web.dto;
 
+
 public record SugerenciaVelorioDTO(
         Long procedimientoId,
         String codigo,
         String nombre,
-        String causaMuerte,
+        String causa,
         String epitafio,
         int minutosSemanalesPerdidos,
-        String deudos) {
+        String deudos,
+        String duenoNombre,
+        String proximoNumeroActa) {
 }

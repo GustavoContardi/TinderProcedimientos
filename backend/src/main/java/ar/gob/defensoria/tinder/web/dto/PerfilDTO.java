@@ -16,7 +16,12 @@ public record PerfilDTO(
         String beneficio,
         String usoTexto,
         String padrinoNombre,
+        String duenoNombre,
+        int version,
         boolean obligatorio,
         String baseObligatoriedad,
-        List<String> areas) {
+        List<String> areas,
+        Long cicloId,
+        String cicloNombre,
+        boolean votacionRapida) {
 }

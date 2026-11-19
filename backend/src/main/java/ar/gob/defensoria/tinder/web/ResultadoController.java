@@ -2,7 +2,7 @@ package ar.gob.defensoria.tinder.web;
 
 import ar.gob.defensoria.tinder.config.UsuarioAutenticado;
 import ar.gob.defensoria.tinder.servicio.ResultadoService;
-import ar.gob.defensoria.tinder.web.dto.ResultadoDTO;
+import ar.gob.defensoria.tinder.web.dto.ResultadoProcedimientoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,10 +22,10 @@ public class ResultadoController {
     }
 
     @GetMapping
-    @Operation(summary = "Resultados agregados por área. EMPLEADO solo ve su área. Sin cicloId: último ciclo cerrado.")
-    public List<ResultadoDTO> listar(@AuthenticationPrincipal UsuarioAutenticado usuario,
-                                     @RequestParam(required = false) Long cicloId,
-                                     @RequestParam(required = false) Long areaId) {
+    @Operation(summary = "Resultados por procedimiento con sus áreas. EMPLEADO solo ve su área. Sin cicloId: último trimestral cerrado.")
+    public List<ResultadoProcedimientoDTO> listar(@AuthenticationPrincipal UsuarioAutenticado usuario,
+                                                  @RequestParam(required = false) Long cicloId,
+                                                  @RequestParam(required = false) Long areaId) {
         return resultados.listar(usuario, cicloId, areaId);
     }
 }

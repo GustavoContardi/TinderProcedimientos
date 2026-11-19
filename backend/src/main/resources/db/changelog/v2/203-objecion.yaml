@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 203-objecion
+      author: tinder-v2
+      comment: >
+        Objeciones anónimas de la minoría. A propósito NO hay usuario autor ni timestamp de creación,
+        y el id es un UUID aleatorio para que el orden de inserción no delate a nadie.
+      changes:
+        - createTable:
+            tableName: objecion
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_objecion_proc, references: procedimiento(id) } }
+              - column: { name: ciclo_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_objecion_ciclo, references: ciclo_votacion(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_objecion_area, references: area(id) } }
+              - column: { name: origen, type: VARCHAR(12), constraints: { nullable: false } }
+              - column: { name: categoria, type: VARCHAR(30), constraints: { nullable: false } }
+              - column: { name: texto, type: TEXT }
+              - column: { name: fundada, type: BOOLEAN }
+              - column: { name: respuesta, type: TEXT }
+              - column: { name: estado, type: VARCHAR(12), defaultValue: PENDIENTE, constraints: { nullable: false } }
+              - column: { name: evaluada_por, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_objecion_evaluador, references: usuario(id) } }
+        - sql:
+            sql: >
+              ALTER TABLE objecion
+                ADD CONSTRAINT ck_objecion_origen CHECK (origen IN ('VOTO','BODA','ANIVERSARIO')),
+                ADD CONSTRAINT ck_objecion_categoria CHECK (categoria IN ('DUPLICA_OTRO_REGISTRO','DEMASIADOS_PASOS',
+                  'NO_APLICA_A_MI_TAREA','DESACTUALIZADO','FALTA_ALGO','NO_SE_PUEDE_EN_URGENCIAS','OTRO')),
+                ADD CONSTRAINT ck_objecion_estado CHECK (estado IN ('PENDIENTE','EVALUADA','RESPONDIDA'))
+        - createIndex:
+            tableName: objecion
+            indexName: ix_objecion_proc
+            columns:
+              - column: { name: procedimiento_id }

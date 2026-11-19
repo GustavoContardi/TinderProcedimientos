@@ -1,24 +1,34 @@
 package ar.gob.defensoria.tinder.servicio;
 
 import ar.gob.defensoria.tinder.config.TinderProperties;
+import ar.gob.defensoria.tinder.config.UsuarioAutenticado;
 import ar.gob.defensoria.tinder.dominio.*;
 
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 final class Fixtures {
 
     static final Area OPERACIONES = new Area(1L, "Operaciones y Mesa de Ayuda");
     static final Area DESARROLLO = new Area(2L, "Desarrollo");
     static final Area INFRA = new Area(3L, "Infraestructura");
+    static final Area ATENCION = new Area(4L, "Atención al Público");
 
     private Fixtures() {
     }
 
     static TinderProperties props() {
-        return new TinderProperties(3, 0.60, 0.60, 15, 6, List.of("http://localhost:4200"));
+        return TinderProperties.porDefecto();
+    }
+
+    static Usuario usuario(Long id, String nombre, Rol rol, Area area) {
+        return new Usuario(id, nombre, nombre.toLowerCase().replace(' ', '.') + "@demo.com", rol, area);
+    }
+
+    static UsuarioAutenticado autenticado(Usuario u) {
+        return new UsuarioAutenticado(u.getId(), u.getNombre(), u.getEmail(), "x", u.getRol(), u.getArea().getId(),
+                u.getArea().getNombre());
     }
 
     static Procedimiento procedimiento(Long id, String codigo, boolean obligatorio, EstadoProcedimiento estado, Area... areas) {
@@ -37,5 +47,9 @@ final class Fixtures {
         p.setEstado(estado);
         p.setAreas(new LinkedHashSet<>(List.of(areas)));
         return p;
+    }
+
+    static EvaluacionProcedimiento.Conteo conteo(Area a, int likes, int nopes) {
+        return new EvaluacionProcedimiento.Conteo(a.getId(), a.getNombre(), likes, nopes);
     }
 }

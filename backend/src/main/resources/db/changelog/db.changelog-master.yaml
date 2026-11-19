@@ -12,3 +12,15 @@ databaseChangeLog:
   - include: { file: changes/011-velorio.yaml, relativeToChangelogFile: true }
   - include: { file: changes/012-alerta.yaml, relativeToChangelogFile: true }
   - include: { file: changes/100-seed.yaml, relativeToChangelogFile: true }
+  # ---------------- v2 (devolución de la cátedra) ----------------
+  - include: { file: v2/200-roles.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/201-procedimiento.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/202-matriz.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/203-objecion.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/204-ciclo.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/205-resultados.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/206-segunda-cita.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/207-casamiento.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/208-velorio.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/209-mejora.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/300-seed-demo.yaml, relativeToChangelogFile: true }

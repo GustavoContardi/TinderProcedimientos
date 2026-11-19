@@ -18,6 +18,8 @@ spring:
         format_sql: false
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+    # Sin perfil "demo" no corre el seed v2 (contexto demo). Ver application-demo.yml
+    contexts: base
   jackson:
     default-property-inclusion: always
 
@@ -27,11 +29,15 @@ springdoc:
 
 # Reglas del Tinder (configurables)
 tinder:
-  quorum-minimo: 3        # menos votos que esto => QUORUM_INSUFICIENTE (no se muestran números)
-  umbral-match: 0.60      # pct_like >= umbral => MATCH
-  umbral-rechazo: 0.60    # pct_nope >= umbral => RECHAZO
+  umbral-casamiento: 0.70     # % "me sirve" >= 70 en todas las áreas => CASAMIENTO
+  umbral-velorio: 0.40        # % "me sirve" < 40 en todas las áreas => VELORIO (si es obligatorio: SEGUNDA_CITA)
+  quorum-area: 3              # un área con menos votos => QUORUM_INSUFICIENTE (no se muestran sus números)
+  participacion-minima: 0.50  # votantes / habilitados por la matriz < 50 % => PARTICIPACION_INSUFICIENTE
   dias-aviso-aniversario: 15
   meses-aniversario: 6
+  dias-compromiso-mejora: 30  # fecha por defecto de las mejoras automáticas
+  dias-votacion-rapida: 7
+  dias-hasta-segunda-cita: 7  # la segunda cita se programa a una semana del cierre
   cors-origins:
     - http://localhost:4200
 

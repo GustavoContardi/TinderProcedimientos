@@ -12,12 +12,13 @@ interface Demo {
   av: Avatar;
 }
 
-/** Usuarios del seed (backend/src/main/resources/db/changelog/seed/seed.sql). Clave de todos: demo123. */
+/** Usuarios del seed demo (backend/src/main/resources/db/changelog/v2/seed-demo.sql). Clave de todos: demo123. */
 const DEMOS: Demo[] = [
-  { email: 'facundo@demo.com', nombre: 'Facundo Ibarra', etq: 'Empleado · Desarrollo', av: avatar({ nombre: 'Facundo Ibarra', rol: 'EMPLEADO', areaId: 2 }) },
-  { email: 'ana@demo.com', nombre: 'Ana Paredes', etq: 'Empleada · Operaciones y Mesa de Ayuda', av: avatar({ nombre: 'Ana Paredes', rol: 'EMPLEADO', areaId: 1 }) },
-  { email: 'calidad@demo.com', nombre: 'Mónica Calderón', etq: 'Calidad · gestiona ciclos y ceremonias', av: avatar({ nombre: 'Mónica Calderón', rol: 'CALIDAD' }) },
-  { email: 'direccion@demo.com', nombre: 'Ricardo Ferreyra', etq: 'Dirección · oficia y firma actas', av: avatar({ nombre: 'Ricardo Ferreyra', rol: 'DIRECCION' }) },
+  { email: 'facundo@demo.com', nombre: 'Facundo Ibarra', etq: 'Empleado · Desarrollo (todavía no votó)', av: avatar({ nombre: 'Facundo Ibarra', rol: 'EMPLEADO', areaId: 2 }) },
+  { email: 'ana@demo.com', nombre: 'Ana Paredes', etq: 'Empleada · Operaciones (vota F-07)', av: avatar({ nombre: 'Ana Paredes', rol: 'EMPLEADO', areaId: 1 }) },
+  { email: 'juez@demo.com', nombre: 'Mónica Calderón', etq: 'Juez de paz · coordina todo el sistema', av: avatar({ nombre: 'Mónica Calderón', rol: 'JUEZ_PAZ' }) },
+  { email: 'direccion@demo.com', nombre: 'Ricardo Ferreyra', etq: 'Dirección · padrino institucional, firma', av: avatar({ nombre: 'Ricardo Ferreyra', rol: 'DIRECCION' }) },
+  { email: 'bruno@demo.com', nombre: 'Bruno Lescano', etq: 'Empleado · dueño de F-23 (firma el acta)', av: avatar({ nombre: 'Bruno Lescano', rol: 'EMPLEADO', areaId: 1 }) },
 ];
 const CLAVE_DEMO = 'demo123';
 
@@ -93,7 +94,7 @@ export class LoginComponent {
 
   constructor() {
     if (this.auth.logueado()) {
-      this.router.navigate(['/votar']);
+      this.router.navigate(['/swipe']);
     }
   }
 
@@ -105,7 +106,7 @@ export class LoginComponent {
     this.cargando.set(true);
     this.error.set(null);
     this.auth.login(email, pass).subscribe({
-      next: () => this.router.navigate(['/votar']),
+      next: () => this.router.navigate(['/swipe']),
       error: (e) => {
         this.error.set(mensajeDeError(e));
         this.cargando.set(false);

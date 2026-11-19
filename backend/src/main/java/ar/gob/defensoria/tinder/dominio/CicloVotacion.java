@@ -25,6 +25,15 @@ public class CicloVotacion {
     @Column(nullable = false)
     private EstadoCiclo estado = EstadoCiclo.ABIERTO;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoCiclo tipo = TipoCiclo.TRIMESTRAL;
+
+    /** Solo para los ciclos RAPIDA: el único procedimiento que se vota. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "procedimiento_id")
+    private Procedimiento procedimiento;
+
     protected CicloVotacion() {
     }
 
@@ -34,6 +43,18 @@ public class CicloVotacion {
         this.fechaFin = fechaFin;
     }
 
+    /** Votación rápida de un solo procedimiento. */
+    public static CicloVotacion rapida(String nombre, Procedimiento p, LocalDate inicio, LocalDate fin) {
+        CicloVotacion c = new CicloVotacion(nombre, inicio, fin);
+        c.tipo = TipoCiclo.RAPIDA;
+        c.procedimiento = p;
+        return c;
+    }
+
+    public boolean esRapida() {
+        return tipo == TipoCiclo.RAPIDA;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }
@@ -41,4 +62,6 @@ public class CicloVotacion {
     public LocalDate getFechaFin() { return fechaFin; }
     public EstadoCiclo getEstado() { return estado; }
     public void cerrar() { this.estado = EstadoCiclo.CERRADO; }
+    public TipoCiclo getTipo() { return tipo; }
+    public Procedimiento getProcedimiento() { return procedimiento; }
 }

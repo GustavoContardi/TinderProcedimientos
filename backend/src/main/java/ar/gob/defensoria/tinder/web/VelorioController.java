@@ -27,17 +27,18 @@ public class VelorioController {
     }
 
     @GetMapping("/sugerencia")
-    @PreAuthorize("hasRole('CALIDAD')")
-    @Operation(summary = "Causa de muerte y epitafio sugeridos para un procedimiento pendiente de velorio")
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    @Operation(summary = "Causa y epitafio sugeridos para un procedimiento pendiente de velorio")
     public SugerenciaVelorioDTO sugerencia(@RequestParam Long procedimientoId) {
         return velorios.sugerencia(procedimientoId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('CALIDAD')")
-    public VelorioDTO crear(@Valid @RequestBody VelorioRequest req) {
-        return velorios.crear(req);
+    @PreAuthorize("hasRole('JUEZ_PAZ')")
+    @Operation(summary = "Labrar el acta de defunción (con reencarnación o motivo de no reemplazo)")
+    public VelorioDTO crear(@Valid @RequestBody VelorioRequest req, @AuthenticationPrincipal UsuarioAutenticado juez) {
+        return velorios.crear(req, juez);
     }
 
     @GetMapping
@@ -51,9 +52,8 @@ public class VelorioController {
     }
 
     @PostMapping("/{id}/firmar")
-    @PreAuthorize("hasRole('DIRECCION')")
-    @Operation(summary = "Firmar el acta de defunción: el procedimiento pasa a VELADO (nunca se borra)")
+    @Operation(summary = "Firma del juez de paz, la Dirección o el dueño. Con las 3, el procedimiento queda VELADO. 409 si repite.")
     public VelorioDTO firmar(@PathVariable Long id, @AuthenticationPrincipal UsuarioAutenticado usuario) {
-        return velorios.firmar(id, usuario.id());
+        return velorios.firmar(id, usuario);
     }
 }

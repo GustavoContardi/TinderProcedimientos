@@ -56,6 +56,11 @@ export class UiService {
     this.mostrarToast(mensajeDeError(e), true);
   }
 
+  /** Aviso de error con un texto propio (validaciones del lado del cliente). */
+  alerta(texto: string): void {
+    this.mostrarToast(texto, true);
+  }
+
   private mostrarToast(texto: string, error: boolean): void {
     clearTimeout(this.toastTimer);
     this.toastTxt.set(texto);

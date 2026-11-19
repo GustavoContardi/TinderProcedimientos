@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 200-rol-juez-paz
+      author: tinder-v2
+      comment: El rol CALIDAD pasa a llamarse JUEZ_PAZ (coordina todo el sistema). La Dirección queda como padrino institucional.
+      changes:
+        - sql:
+            sql: ALTER TABLE usuario DROP CONSTRAINT ck_usuario_rol
+        - sql:
+            sql: UPDATE usuario SET rol = 'JUEZ_PAZ' WHERE rol = 'CALIDAD'
+        - sql:
+            sql: ALTER TABLE usuario ADD CONSTRAINT ck_usuario_rol CHECK (rol IN ('EMPLEADO','JUEZ_PAZ','DIRECCION'))
+
+  - changeSet:
+      id: 200-designacion-juez
+      author: tinder-v2
+      comment: Historial de la rotación anual del juez de paz. Un solo juez vigente (hasta IS NULL) por área.
+      changes:
+        - createTable:
+            tableName: designacion_juez
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: usuario_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_designacion_usuario, references: usuario(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_designacion_area, references: area(id) } }
+              - column: { name: desde, type: DATE, constraints: { nullable: false } }
+              - column: { name: hasta, type: DATE }
+        - sql:
+            sql: ALTER TABLE designacion_juez ADD CONSTRAINT ck_designacion_fechas CHECK (hasta IS NULL OR hasta >= desde)
+        - sql:
+            sql: CREATE UNIQUE INDEX ux_designacion_vigente_por_area ON designacion_juez (area_id) WHERE hasta IS NULL
+        # Los usuarios que eran CALIDAD quedan designados en su área (uno por área: el de menor id)
+        - sql:
+            sql: >
+              INSERT INTO designacion_juez (usuario_id, area_id, desde)
+              SELECT MIN(id), area_id, CURRENT_DATE FROM usuario WHERE rol = 'JUEZ_PAZ' GROUP BY area_id

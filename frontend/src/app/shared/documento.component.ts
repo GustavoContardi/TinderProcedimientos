@@ -1,8 +1,8 @@
 import { Component, OnDestroy, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
-import { ESTADOS_CASAMIENTO, fCorta, fFirma, fLarga, lista } from '../core/diseno';
-import { Casamiento, Velorio } from '../core/models';
+import { CATEGORIAS, ESTADOS_CASAMIENTO, fCorta, fFirma, fLarga, lista } from '../core/diseno';
+import { Casamiento, CategoriaObjecion, Velorio } from '../core/models';
 import { UiService } from '../core/ui.service';
 
 const MS_FIRMA = 1300;
@@ -14,69 +14,121 @@ const MS_FIRMA = 1300;
     <div class="panel" [class.on]="ui.docAbierto()" [class.oscuro]="esNecro()">
       <div class="barra">
         <button class="redondo" (click)="ui.cerrarDoc()" aria-label="Volver"><span class="ms">arrow_back</span></button>
-        <span class="flex titulo">{{ esNecro() ? 'Necrológica' : 'Libreta de casamiento' }}</span>
+        <span class="flex titulo">{{ esNecro() ? 'Acta de defunción' : 'Libreta de casamiento' }}</span>
         <button class="imprimir" (click)="imprimir()"><span class="ms">print</span>Imprimir</button>
       </div>
       <div class="contenido">
         @if (!esNecro() && casamiento(); as c) {
+          @if (c.estado === 'POSTERGADO') {
+            <div class="postergado"><span class="ms">pause_circle</span>Boda postergada: una objeción fundada la frenó y el procedimiento volvió a segunda cita.</div>
+          }
           <div class="libreta" data-print="1">
             <div class="anillos" style="--d: 34px; --b: 2.5px; --c1: #8A6D3B; --c2: #8A6D3B; margin: 0 auto"></div>
             <div class="sup">Registro Civil de Procedimientos · Defensoría del Pueblo</div>
             <h1>Libreta de casamiento</h1>
-            <div class="acta">Acta N.º {{ acta(c.id) }} · Tomo ISO 9001</div>
+            <div class="acta">Libreta N.º {{ c.numero }} · Tomo ISO 9001</div>
             <p class="cuerpo">
-              En la fecha <strong>{{ fLarga(c.fecha) }}</strong>, ante el oficiante <strong>{{ c.oficianteNombre }}</strong>,
-              el procedimiento <strong>{{ c.codigo }} «{{ c.nombre }}»</strong> contrae matrimonio{{ c.grupal ? ' grupal' : '' }}
-              con <strong>{{ lista(c.areas) }}</strong>, quienes se comprometen públicamente a usarlo en las buenas,
-              en las malas y en las auditorías.
+              En la fecha <strong>{{ fLarga(c.fecha) }}</strong>, ante el juez de paz <strong>{{ c.oficianteNombre }}</strong>,
+              el procedimiento <strong>{{ c.codigo }} «{{ c.nombre }}»</strong>, versión {{ c.versionProcedimiento }}, contrae
+              matrimonio{{ c.grupal ? ' grupal' : '' }} con <strong>{{ lista(c.areas) }}</strong>, quienes se comprometen
+              públicamente a usarlo en las buenas, en las malas y en las auditorías.
             </p>
+            @if (c.resultados.length) {
+              <div class="seccion">Aprobación por área</div>
+              <div class="pcts">
+                @for (r of c.resultados; track r.areaNombre) {
+                  <div class="pct"><span class="n">{{ r.pct }} %</span><span class="a">{{ r.areaNombre }}</span></div>
+                }
+              </div>
+            }
             <div class="seccion">Votos</div>
             <p class="votos">«{{ c.votos }}»</p>
             <div class="seccion">Acuerdo prenupcial · versión express</div>
             <div class="express">{{ c.versionExpress || '—' }}</div>
+            @if (c.condiciones) {
+              <div class="seccion">Condiciones</div>
+              <div class="express">{{ c.condiciones }}</div>
+            }
             <div class="datos">
+              <div><strong>Dueño</strong><span>{{ c.duenoNombre ?? 'Sin dueño' }}</span></div>
               <div><strong>Padrino</strong><span>{{ c.padrinoNombre ?? 'Sin padrino' }}</span></div>
+              <div><strong>Testigos</strong><span>{{ testigos(c) }}</span></div>
               <div><strong>Aniversario (revisión)</strong><span>{{ fCorta(c.fechaAniversario) }}</span></div>
               <div><strong>Estado</strong><span>{{ estadoCasamiento(c) }}</span></div>
             </div>
+            <div class="seccion">Objeciones tratadas</div>
+            @if (c.objecionesTratadas.length) {
+              <ul class="objeciones">
+                @for (o of c.objecionesTratadas; track $index) {
+                  <li><strong>{{ categoria(o.categoria) }}</strong> ({{ o.fundada ? 'fundada' : 'no fundada' }}): {{ o.respuesta ?? 'sin respuesta todavía' }}</li>
+                }
+              </ul>
+            } @else {
+              <p class="nadie">Nadie se opuso. Que hablen ahora o callen para siempre.</p>
+            }
+            @if (c.informeAniversario) {
+              <div class="seccion">Informe de aniversario · uso real</div>
+              <div class="express">{{ c.informeAniversario }}</div>
+            }
             <p class="lema">«Hasta que la burocracia nos separe»</p>
-            <div class="firmas"><div>Oficiante</div><div>Padrino</div><div>Calidad</div></div>
+            <div class="firmas"><div>Juez de paz</div><div>Dueño</div><div>Padrino</div></div>
           </div>
         }
 
         @if (esNecro() && velorio(); as v) {
           <div class="necro" data-print="1">
             <div class="cruz">✝</div>
+            <div class="titulo-acta">ACTA DE DEFUNCIÓN N.º {{ v.numeroActa }}</div>
             <p class="intro">Con profundo alivio despedimos a</p>
             <h1>{{ v.codigo }} {{ v.nombre }}</h1>
-            <p class="fechas">✶ {{ fCorta(v.fechaNacimiento) }} &nbsp;—&nbsp; ✝ {{ fCorta(v.fecha) }}</p>
+            <p class="fechas">✶ {{ fCorta(v.fechaNacimiento) }} &nbsp;—&nbsp; ✝ {{ fCorta(v.fecha) }} · versión {{ v.version }}</p>
             <p class="epitafio">{{ v.epitafio }}</p>
             <div class="datos-necro">
-              <div><div class="k">Causa de muerte</div><div class="v">{{ v.causaMuerte }}</div></div>
+              <div><div class="k">Causa</div><div class="v">{{ v.causa }}</div></div>
               <div><div class="k">Tiempo que nos robaba</div><div class="v">{{ v.minutosSemanalesPerdidos }} minutos por semana</div></div>
+              <div><div class="k">Herencia</div><div class="v">{{ v.herencia ?? 'Nada que rescatar.' }}</div></div>
+              <div><div class="k">Lecciones</div><div class="v">{{ v.lecciones ?? '—' }}</div></div>
+              <div>
+                <div class="k">Reencarnación</div>
+                <div class="v">
+                  @if (v.reencarnacionCodigo) {
+                    {{ v.reencarnacionCodigo }} «{{ v.reencarnacionNombre }}»
+                    @if (v.reencarnacionEstado === 'BORRADOR') { <span class="borrador">en borrador</span> }
+                  } @else {
+                    Sin reemplazo: {{ v.sinReemplazoMotivo }}
+                  }
+                </div>
+              </div>
               <div><div class="k">Deudos</div><div class="v">{{ v.deudos }}</div></div>
             </div>
             <p class="norma">
               Se conserva como documento obsoleto según ISO 9001 7.5.3 (control de la información documentada). Q.E.P.D.
             </p>
             <div class="pie">
-              @if (v.actaFirmada) {
-                <p class="firmada">
-                  ✔ Acta de defunción firmada por <strong>{{ v.firmadoPorNombre }}</strong>
-                  @if (v.fechaFirma) { el {{ fFirma(v.fechaFirma) }} }
-                </p>
-              } @else {
-                <p class="pendiente">Acta de defunción pendiente de firma de la Dirección.</p>
-                @if (esDireccion()) {
-                  <button class="firmar" (pointerdown)="apretar()" (pointerup)="soltar()" (pointerleave)="soltar()"
-                          (pointercancel)="soltar()" (contextmenu)="$event.preventDefault()" [disabled]="firmando()">
-                    <span class="relleno" [style.width.%]="progreso() * 100"></span>
-                    <span class="etiqueta" [style.color]="progreso() > .5 ? '#3D2600' : '#F2A541'">
-                      <span class="ms">draw</span>{{ firmando() ? 'Firmando…' : 'Mantené apretado para firmar' }}
-                    </span>
-                  </button>
-                  <p class="aviso">Firmar es definitivo: el procedimiento queda velado para siempre.</p>
+              <div class="firmas-acta">
+                @for (f of v.firmas; track f.rol) {
+                  <div class="firma" [class.ok]="f.usuarioId">
+                    <span class="ms">{{ f.usuarioId ? 'verified' : 'pending' }}</span>
+                    <div>
+                      <div class="k">{{ f.etiqueta }}{{ f.rol === 'DUENO' && v.duenoNombre ? ' · ' + v.duenoNombre : '' }}</div>
+                      <div class="v">{{ f.usuarioId ? f.nombre + ' · ' + fFirma(f.fecha!) : 'Pendiente' }}</div>
+                    </div>
+                  </div>
                 }
+              </div>
+              @if (v.completa) {
+                <p class="firmada">✔ Acta completa: {{ v.codigo }} quedó velado y descansa en el archivo de obsoletos.</p>
+              } @else if (puedoFirmar(v)) {
+                <button class="firmar" (pointerdown)="apretar()" (pointerup)="soltar()" (pointerleave)="soltar()"
+                        (pointercancel)="soltar()" (contextmenu)="$event.preventDefault()" [disabled]="firmando()">
+                  <span class="relleno" [style.width.%]="progreso() * 100"></span>
+                  <span class="etiqueta" [style.color]="progreso() > .5 ? '#3D2600' : '#F2A541'">
+                    <span class="ms">draw</span>{{ firmando() ? 'Firmando…' : 'Firmar (mantené apretado)' }}
+                  </span>
+                </button>
+                <p class="aviso">Con las tres firmas el procedimiento queda velado para siempre.</p>
+              } @else {
+                <p class="pendiente">Faltan firmas. Tu firma no corresponde o ya está.</p>
               }
             </div>
           </div>
@@ -123,6 +175,22 @@ const MS_FIRMA = 1300;
     .lema { margin: 24px 0 0; font-style: italic; font-size: 21px; color: var(--petroleo); }
     .firmas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 40px; font-family: var(--sans); font-size: 11px; color: #4A3A1C; }
     .firmas > div { border-top: 1px solid #4A3A1C; padding-top: 5px; }
+    .postergado { display: flex; gap: 8px; align-items: center; margin: 0 8px 10px; padding: 10px 14px; border-radius: 12px;
+      background: #FBE9CC; color: #6B4300; font-size: 13px; font-weight: 600; font-family: var(--sans); }
+    .postergado .ms { font-size: 20px; }
+    .pcts { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px; }
+    .pct { display: flex; flex-direction: column; padding: 8px; background: #fff; border: 1px dashed #C9B28A; }
+    .pct .n { font-size: 22px; color: #2E7D73; }
+    .pct .a { font-family: var(--sans); font-size: 10.5px; color: #7A5E2E; }
+    .objeciones { margin: 0; padding-left: 18px; text-align: left; font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+    .nadie { margin: 0; font-style: italic; font-size: 14px; color: #7A5E2E; }
+    .titulo-acta { margin-top: 10px; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .18em; color: var(--ambar); }
+    .borrador { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #3B3F40; font-size: 11px; color: #F2F2F2; }
+    .firmas-acta { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; text-align: left; }
+    .firma { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px dashed #4B5153; }
+    .firma .ms { font-size: 22px; color: #9AA3A5; }
+    .firma.ok { border-style: solid; border-color: #2E7D73; }
+    .firma.ok .ms { color: #9FD3CB; }
 
     .necro {
       background: #151819; color: #E9E9E9; text-align: center; padding: 34px 20px 26px; border-radius: 6px;
@@ -163,7 +231,7 @@ export class DocumentoComponent implements OnDestroy {
   readonly progreso = signal(0);
   readonly firmando = signal(false);
   readonly esNecro = computed(() => this.ui.doc()?.tipo === 'necro');
-  readonly esDireccion = computed(() => this.auth.usuario()?.rol === 'DIRECCION');
+  readonly usuario = this.auth.usuario;
   private raf = 0;
 
   readonly fCorta = fCorta;
@@ -194,8 +262,25 @@ export class DocumentoComponent implements OnDestroy {
     }
   }
 
-  acta(id: number): string {
-    return String(id).padStart(4, '0');
+  /** El botón se ve si me toca una firma pendiente: juez de paz, Dirección o dueño. Una persona, una firma. */
+  puedoFirmar(v: Velorio): boolean {
+    const u = this.usuario();
+    if (!u || v.firmas.some((f) => f.usuarioId === u.id)) return false;
+    return v.firmas.some(
+      (f) =>
+        !f.usuarioId &&
+        ((f.rol === 'JUEZ_PAZ' && u.rol === 'JUEZ_PAZ') ||
+          (f.rol === 'DIRECCION' && u.rol === 'DIRECCION') ||
+          (f.rol === 'DUENO' && v.duenoId === u.id)),
+    );
+  }
+
+  testigos(c: Casamiento): string {
+    return c.testigos.length ? lista(c.testigos.map((t) => `${t.nombre} (${t.areaNombre})`)) : 'Sin testigos';
+  }
+
+  categoria(c: CategoriaObjecion): string {
+    return CATEGORIAS[c];
   }
 
   estadoCasamiento(c: Casamiento): string {
@@ -230,7 +315,7 @@ export class DocumentoComponent implements OnDestroy {
         this.velorio.set(firmado);
         this.firmando.set(false);
         this.progreso.set(0);
-        this.ui.ok(`${v.codigo} descansa en paz. Acta firmada.`);
+        this.ui.ok(firmado.completa ? `${v.codigo} descansa en paz: acta completa.` : 'Firma registrada. Faltan las otras.');
         this.ui.avisarCambio();
       },
       error: (e) => {

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-/** Aviso para que Calidad revise un procedimiento después de cerrar un ciclo. */
+/** Aviso para que el juez de paz revise un procedimiento después de cerrar un ciclo. */
 @Entity
 @Table(name = "alerta")
 public class Alerta {

@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 207-casamiento-libreta
+      author: tinder-v2
+      comment: La libreta suma número, versión, dueño, condiciones, informe de aniversario y el estado POSTERGADO.
+      changes:
+        - addColumn:
+            tableName: casamiento
+            columns:
+              - column: { name: numero, type: VARCHAR(20) }
+              - column: { name: version_procedimiento, type: INT, defaultValueNumeric: 1, constraints: { nullable: false } }
+              - column: { name: dueno_id, type: BIGINT, constraints: { nullable: true, foreignKeyName: fk_casamiento_dueno, references: usuario(id) } }
+              - column: { name: condiciones, type: TEXT }
+              - column: { name: informe_aniversario, type: TEXT }
+        # Numeración de los casamientos existentes: L-001/2026, L-002/2026… por año
+        - sql:
+            sql: >
+              UPDATE casamiento c SET numero = n.numero
+              FROM (SELECT id, 'L-' || LPAD(ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM fecha) ORDER BY fecha, id)::TEXT, 3, '0')
+                           || '/' || EXTRACT(YEAR FROM fecha)::INT AS numero
+                    FROM casamiento) n
+              WHERE n.id = c.id
+        - sql:
+            sql: UPDATE casamiento c SET dueno_id = p.dueno_id, version_procedimiento = p.version FROM procedimiento p WHERE p.id = c.procedimiento_id
+        - addNotNullConstraint:
+            tableName: casamiento
+            columnName: numero
+        - addUniqueConstraint:
+            tableName: casamiento
+            columnNames: numero
+            constraintName: uk_casamiento_numero
+        - sql:
+            sql: ALTER TABLE casamiento DROP CONSTRAINT ck_casamiento_estado
+        - sql:
+            sql: ALTER TABLE casamiento ADD CONSTRAINT ck_casamiento_estado CHECK (estado IN ('VIGENTE','POSTERGADO','RENOVADO','DIVORCIADO'))
+
+  - changeSet:
+      id: 207-casamiento-testigo-resultado
+      author: tinder-v2
+      changes:
+        - createTable:
+            tableName: casamiento_testigo
+            columns:
+              - column: { name: casamiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_testigo_cas, references: casamiento(id) } }
+              - column: { name: usuario_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_testigo_usuario, references: usuario(id) } }
+        - addPrimaryKey:
+            tableName: casamiento_testigo
+            columnNames: casamiento_id, usuario_id
+            constraintName: pk_casamiento_testigo
+        - createTable:
+            tableName: casamiento_resultado
+            remarks: Foto de la aprobación por área en el momento del casamiento
+            columns:
+              - column: { name: casamiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_cas_res_cas, references: casamiento(id) } }
+              - column: { name: area_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_cas_res_area, references: area(id) } }
+              - column: { name: pct, type: "NUMERIC(5,4)", constraints: { nullable: false } }
+        - addPrimaryKey:
+            tableName: casamiento_resultado
+            columnNames: casamiento_id, area_id
+            constraintName: pk_casamiento_resultado
+        # Foto retroactiva de los casamientos existentes con el último resultado con quórum de cada área
+        - sql:
+            sql: >
+              INSERT INTO casamiento_resultado (casamiento_id, area_id, pct)
+              SELECT DISTINCT ON (c.id, r.area_id) c.id, r.area_id, r.pct_like
+              FROM casamiento c
+              JOIN resultado_ciclo r ON r.procedimiento_id = c.procedimiento_id AND r.veredicto <> 'QUORUM_INSUFICIENTE'
+              JOIN ciclo_votacion cv ON cv.id = r.ciclo_id AND cv.fecha_fin <= c.fecha
+              ORDER BY c.id, r.area_id, cv.fecha_fin DESC

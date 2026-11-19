@@ -1,9 +1,21 @@
-import { Alerta, EstadoCasamiento, EstadoProcedimiento, Rol, TipoProcedimiento, Veredicto } from './models';
+import {
+  Alerta,
+  CategoriaObjecion,
+  DecisionSegundaCita,
+  EstadoCasamiento,
+  EstadoMejora,
+  EstadoProcedimiento,
+  OrigenMejora,
+  Rol,
+  TipoProcedimiento,
+  Veredicto,
+} from './models';
 
 /** [texto, fondo, tinta] para pintar chips. */
 export type Colores = readonly [string, string, string];
 
 export const ESTADOS: Record<EstadoProcedimiento, Colores> = {
+  BORRADOR: ['Borrador', '#ECE8E0', '#4F5958'],
   EN_TINDER: ['En Tinder', '#F8E1DB', '#8A2F1D'],
   SEGUNDA_CITA: ['Segunda cita', '#FBE9CC', '#6B4300'],
   PENDIENTE_CASAMIENTO: ['Pendiente de casamiento', '#DCEDEA', '#1D5A52'],
@@ -13,16 +25,19 @@ export const ESTADOS: Record<EstadoProcedimiento, Colores> = {
 };
 export const ESTADOS_LISTA = Object.keys(ESTADOS) as EstadoProcedimiento[];
 
+/** Destinos y veredictos: casamiento verde, segunda cita ámbar, velorio coral, insuficientes gris. */
 export const VEREDICTOS: Record<Veredicto, Colores> = {
-  MATCH: ['Match', '#2E7D73', '#FFFFFF'],
-  RECHAZO: ['Rechazo', '#D0573F', '#FFFFFF'],
+  CASAMIENTO: ['Casamiento', '#2E7D73', '#FFFFFF'],
   SEGUNDA_CITA: ['Segunda cita', '#F2A541', '#3D2600'],
-  QUORUM_INSUFICIENTE: ['Pocos votos', '#E3E1DC', '#4F5958'],
+  VELORIO: ['Velorio', '#D0573F', '#FFFFFF'],
+  QUORUM_INSUFICIENTE: ['Quórum insuficiente', '#E3E1DC', '#4F5958'],
+  PARTICIPACION_INSUFICIENTE: ['Participación insuficiente', '#E3E1DC', '#4F5958'],
 };
 
 export const ESTADOS_CASAMIENTO: Record<EstadoCasamiento, Colores> = {
   VIGENTE: ['Vigente', '#DCEDEA', '#1D5A52'],
-  RENOVADO: ['Renovado', '#FBE9CC', '#6B4300'],
+  POSTERGADO: ['Postergado', '#FBE9CC', '#6B4300'],
+  RENOVADO: ['Renovado', '#ECE8E0', '#4F5958'],
   DIVORCIADO: ['Divorciado', '#F8E1DB', '#8A2F1D'],
 };
 
@@ -37,13 +52,46 @@ export function iconoTipo(t: TipoProcedimiento): string {
   return t === 'REGISTRO' ? 'assignment' : 'menu_book';
 }
 
-/**
- * Mismos umbrales que backend/src/main/resources/application.yml (tinder.*).
- * Solo se usan para agregar "Todas las áreas" en Resultados; por área manda el veredicto del backend.
- */
-export const QUORUM_MINIMO = 3;
-export const UMBRAL_MATCH = 0.6;
-export const UMBRAL_RECHAZO = 0.6;
+/** Líneas guía de Resultados: mismos umbrales que backend/src/main/resources/application.yml (tinder.*). */
+export const UMBRAL_CASAMIENTO = 70;
+export const UMBRAL_VELORIO = 40;
+
+export const CATEGORIAS: Record<CategoriaObjecion, string> = {
+  DUPLICA_OTRO_REGISTRO: 'Duplica otro registro',
+  DEMASIADOS_PASOS: 'Demasiados pasos',
+  NO_APLICA_A_MI_TAREA: 'No aplica a mi tarea',
+  DESACTUALIZADO: 'Está desactualizado',
+  FALTA_ALGO: 'Le falta algo',
+  NO_SE_PUEDE_EN_URGENCIAS: 'No se puede en urgencias',
+  OTRO: 'Otro motivo',
+};
+export const CATEGORIAS_LISTA = Object.keys(CATEGORIAS) as CategoriaObjecion[];
+
+/** [texto, ícono] */
+export const ORIGENES_MEJORA: Record<OrigenMejora, readonly [string, string]> = {
+  OBJECION: ['Objeción', 'record_voice_over'],
+  SEGUNDA_CITA: ['Segunda cita', 'coffee'],
+  ACTA_DEFUNCION: ['Acta de defunción', 'local_florist'],
+  ANIVERSARIO: ['Aniversario', 'cake'],
+  REFORMULACION: ['Reformulación', 'restart_alt'],
+};
+export const ORIGENES_MEJORA_LISTA = Object.keys(ORIGENES_MEJORA) as OrigenMejora[];
+
+export const ESTADOS_MEJORA: Record<EstadoMejora, Colores> = {
+  NUEVA: ['Nueva', '#ECE8E0', '#4F5958'],
+  EN_ANALISIS: ['En análisis', '#FBE9CC', '#6B4300'],
+  EN_CURSO: ['En curso', '#DCEDEA', '#1D5A52'],
+  RESUELTA: ['Resuelta', '#2E7D73', '#FFFFFF'],
+  DESCARTADA: ['Descartada', '#F8E1DB', '#8A2F1D'],
+};
+export const ESTADOS_MEJORA_LISTA = Object.keys(ESTADOS_MEJORA) as EstadoMejora[];
+
+/** [título, explicación] */
+export const DECISIONES: Record<DecisionSegundaCita, readonly [string, string]> = {
+  AJUSTAR_Y_REVOTAR: ['Ajustar y revotar', 'El dueño lo edita (versión + 1) y se vuelve a votar: ya, en una votación rápida, o en el próximo Tinder.'],
+  CASAR_CON_CONDICIONES: ['Casar con condiciones', 'Votación rápida de 7 días: con 70 % o más se casa y las condiciones van a la libreta.'],
+  VELORIO: ['Velorio', 'Votación rápida de 7 días: con menos de 40 % pasa a pendiente de velorio.'],
+};
 
 // ---------- Personas ----------
 
@@ -60,11 +108,11 @@ export function avatar(u: { nombre: string; rol: Rol; areaId?: number; areaNombr
     .slice(0, 2)
     .map((w) => w[0].toUpperCase())
     .join('');
-  if (u.rol === 'CALIDAD') {
-    return { ini, bg: '#12343B', color: '#F5F0E6', etq: 'Calidad · gestiona ciclos y ceremonias' };
+  if (u.rol === 'JUEZ_PAZ') {
+    return { ini, bg: '#12343B', color: '#F5F0E6', etq: `Juez de paz · ${u.areaNombre ?? 'coordina todo'}` };
   }
   if (u.rol === 'DIRECCION') {
-    return { ini, bg: '#F8E1DB', color: '#8A2F1D', etq: 'Dirección · oficia y firma actas' };
+    return { ini, bg: '#F8E1DB', color: '#8A2F1D', etq: 'Dirección · padrino institucional' };
   }
   const par = (u.areaId ?? 0) % 2 === 0;
   return {

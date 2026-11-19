@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 205-veredictos-v2
+      author: tinder-v2
+      comment: MATCH pasa a CASAMIENTO y RECHAZO a VELORIO. Es solo un renombre, los ciclos viejos NO se recalculan.
+      changes:
+        - sql:
+            sql: ALTER TABLE resultado_ciclo DROP CONSTRAINT ck_resultado_veredicto
+        - sql:
+            sql: UPDATE resultado_ciclo SET veredicto = 'CASAMIENTO' WHERE veredicto = 'MATCH'
+        - sql:
+            sql: UPDATE resultado_ciclo SET veredicto = 'VELORIO' WHERE veredicto = 'RECHAZO'
+        - sql:
+            sql: >
+              ALTER TABLE resultado_ciclo ADD CONSTRAINT ck_resultado_veredicto CHECK (veredicto IN
+                ('CASAMIENTO','SEGUNDA_CITA','VELORIO','QUORUM_INSUFICIENTE','PARTICIPACION_INSUFICIENTE'))
+
+  - changeSet:
+      id: 205-resultado-procedimiento
+      author: tinder-v2
+      comment: Resultado consolidado por procedimiento y ciclo (participación, destino, grupal, relación a distancia).
+      changes:
+        - createTable:
+            tableName: resultado_procedimiento
+            columns:
+              - column: { name: id, type: BIGINT, autoIncrement: true, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: ciclo_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_res_proc_ciclo, references: ciclo_votacion(id) } }
+              - column: { name: procedimiento_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_res_proc_proc, references: procedimiento(id) } }
+              - column: { name: pct_global, type: "NUMERIC(5,4)", constraints: { nullable: false } }
+              - column: { name: votantes, type: INT, constraints: { nullable: false } }
+              - column: { name: habilitados, type: INT, constraints: { nullable: false } }
+              - column: { name: destino, type: VARCHAR(30), constraints: { nullable: false } }
+              - column: { name: relacion_a_distancia, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: grupal, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: mensaje, type: TEXT, constraints: { nullable: false } }
+        - addUniqueConstraint:
+            tableName: resultado_procedimiento
+            columnNames: ciclo_id, procedimiento_id
+            constraintName: uk_resultado_procedimiento
+        - sql:
+            sql: >
+              ALTER TABLE resultado_procedimiento ADD CONSTRAINT ck_resultado_proc_destino CHECK (destino IN
+                ('CASAMIENTO','SEGUNDA_CITA','VELORIO','QUORUM_INSUFICIENTE','PARTICIPACION_INSUFICIENTE'))

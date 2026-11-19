@@ -18,6 +18,7 @@ public record ProcedimientoRequest(
         boolean obligatorio,
         String baseObligatoriedad,
         Long autorId,
+        Long duenoId,
         String versionExpress,
         @NotEmpty(message = "El procedimiento tiene que pertenecer al menos a un área") Set<Long> areaIds) {
 }

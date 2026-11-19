@@ -51,6 +51,25 @@ public class Procedimiento {
     @JoinColumn(name = "autor_id")
     private Usuario autor;
 
+    /** El dueño es el responsable del contenido: firma el acta, responde las mejoras y edita tras una segunda cita. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "dueno_id")
+    private Usuario dueno;
+
+    @Column(name = "version", nullable = false)
+    private int numeroVersion = 1;
+
+    /** Reencarnación: el procedimiento velado al que reemplaza. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reemplaza_a_id")
+    private Procedimiento reemplazaA;
+
+    @Column(name = "segundas_citas_consecutivas", nullable = false)
+    private int segundasCitasConsecutivas;
+
+    @Column(name = "requiere_reformulacion", nullable = false)
+    private boolean requiereReformulacion;
+
     /** Acuerdo prenupcial: versión de una página para urgencias. */
     @Column(name = "version_express", columnDefinition = "TEXT")
     private String versionExpress;
@@ -111,6 +130,16 @@ public class Procedimiento {
     public void setBaseObligatoriedad(String baseObligatoriedad) { this.baseObligatoriedad = baseObligatoriedad; }
     public Usuario getAutor() { return autor; }
     public void setAutor(Usuario autor) { this.autor = autor; }
+    public Usuario getDueno() { return dueno; }
+    public void setDueno(Usuario dueno) { this.dueno = dueno; }
+    public int getNumeroVersion() { return numeroVersion; }
+    public void setNumeroVersion(int numeroVersion) { this.numeroVersion = numeroVersion; }
+    public Procedimiento getReemplazaA() { return reemplazaA; }
+    public void setReemplazaA(Procedimiento reemplazaA) { this.reemplazaA = reemplazaA; }
+    public int getSegundasCitasConsecutivas() { return segundasCitasConsecutivas; }
+    public void setSegundasCitasConsecutivas(int n) { this.segundasCitasConsecutivas = n; }
+    public boolean isRequiereReformulacion() { return requiereReformulacion; }
+    public void setRequiereReformulacion(boolean requiereReformulacion) { this.requiereReformulacion = requiereReformulacion; }
     public String getVersionExpress() { return versionExpress; }
     public void setVersionExpress(String versionExpress) { this.versionExpress = versionExpress; }
     public EstadoProcedimiento getEstado() { return estado; }
