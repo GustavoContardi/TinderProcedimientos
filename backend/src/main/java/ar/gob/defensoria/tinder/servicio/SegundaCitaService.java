@@ -23,7 +23,7 @@ import static ar.gob.defensoria.tinder.servicio.ProcedimientoService.blancoANull
 /**
  * Segunda cita: reunión de 30 minutos con minuta y decisión. Ninguna decisión cambia el destino por sí sola:
  * CASAR_CON_CONDICIONES y VELORIO abren una votación rápida de 7 días; AJUSTAR_Y_REVOTAR habilita al dueño
- * a editar y el juez elige entre esperar al próximo Tinder o lanzar la votación rápida.
+ * a editar y el juez elige entre esperar al próximo ciclo trimestral o lanzar la votación rápida.
  */
 @Service
 public class SegundaCitaService {
@@ -62,7 +62,7 @@ public class SegundaCitaService {
     public SegundaCitaDTO realizar(Long id, RealizarCitaRequest req, UsuarioAutenticado juez) {
         SegundaCita cita = buscar(id);
         if (cita.getEstado() == EstadoSegundaCita.REALIZADA) {
-            throw ApiException.conflicto("CITA_REALIZADA", "Esa segunda cita ya se hizo. No hay tercera (por ahora).");
+            throw ApiException.conflicto("CITA_REALIZADA", "Esa segunda cita ya se realizó.");
         }
         Procedimiento p = cita.getProcedimiento();
         if (p.getEstado() != EstadoProcedimiento.SEGUNDA_CITA) {
@@ -76,7 +76,7 @@ public class SegundaCitaService {
         }
         String condiciones = blancoANull(req.condiciones());
         if (decision == DecisionSegundaCita.CASAR_CON_CONDICIONES && condiciones == null) {
-            throw ApiException.reglaNegocio("FALTAN_CONDICIONES", "Casar con condiciones… ¿cuáles? Escribilas.");
+            throw ApiException.reglaNegocio("FALTAN_CONDICIONES", "Para casar con condiciones hay que indicar cuáles son.");
         }
         cita.realizar(req.minuta().trim(), decision, condiciones);
 
@@ -91,7 +91,7 @@ public class SegundaCitaService {
         }
         String descripcion = switch (decision) {
             case AJUSTAR_Y_REVOTAR -> "Ajustar " + p.getCodigo() + " según la minuta de la segunda cita"
-                    + (lanzar ? " antes de que cierre la votación rápida." : " para el próximo Tinder.");
+                    + (lanzar ? " antes de que cierre la votación rápida." : " para el próximo ciclo trimestral.");
             case CASAR_CON_CONDICIONES -> "Cumplir las condiciones del casamiento de " + p.getCodigo() + ": " + condiciones;
             case VELORIO -> "Preparar la posible baja de " + p.getCodigo() + " (herencia y reemplazo) mientras se vota.";
         };

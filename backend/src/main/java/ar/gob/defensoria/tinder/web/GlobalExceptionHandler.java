@@ -69,6 +69,6 @@ public class GlobalExceptionHandler {
         // Solo el tipo y el mensaje técnico: nunca datos del request (podría contener un voto).
         log.error("Error inesperado: {}", e.toString());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorDTO("ERROR_INTERNO", "Algo se rompió. No fue tu culpa (esta vez)."));
+                .body(new ErrorDTO("ERROR_INTERNO", "Ocurrió un error interno. Intentá de nuevo en unos minutos."));
     }
 }

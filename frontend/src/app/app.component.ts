@@ -7,7 +7,7 @@ import { DocumentoComponent } from './shared/documento.component';
 
 /**
  * Escenario + marco de teléfono (en pantallas ≥ 520px) y todas las capas flotantes:
- * overlay de match, hoja inferior, documento (libreta / necrológica) y toast.
+ * cartel de voto registrado (me sirve), hoja inferior, documento (libreta / necrológica) y toast.
  */
 @Component({
   selector: 'app-root',
@@ -19,10 +19,10 @@ import { DocumentoComponent } from './shared/documento.component';
 
         <div class="match" [class.on]="ui.matchOn()" (click)="ui.cerrarMatch()" role="status" aria-live="polite">
           <div class="anillos grande"></div>
-          <div class="match-titulo">¡Es un match!</div>
-          <div class="match-sub">Preparen la libreta</div>
+          <div class="match-titulo">Voto registrado</div>
+          <div class="match-sub">Me sirve</div>
           <div class="match-txt">
-            A tu área también le sirve {{ ui.matchNombre() }}. Si se confirma al cierre del trimestre, hay casamiento.
+            Votaste a favor de {{ ui.matchNombre() }}. Si al cierre del trimestre alcanza el 70 % en las áreas que lo usan, pasa a casamiento.
           </div>
         </div>
 
@@ -70,7 +70,7 @@ import { DocumentoComponent } from './shared/documento.component';
       transform: scale(.4); transition: transform .55s cubic-bezier(.3,1.6,.5,1);
     }
     .match.on .anillos.grande { transform: scale(1); }
-    .match-titulo { font-family: var(--serif); font-style: italic; font-size: 48px; line-height: 1; color: var(--crema); letter-spacing: -.02em; }
+    .match-titulo { font-family: var(--serif); font-style: italic; font-size: 42px; line-height: 1.05; color: var(--crema); letter-spacing: -.02em; }
     .match-sub { font-size: 13px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ambar); }
     .match-txt { font-size: 13.5px; line-height: 1.5; color: rgba(245,240,230,.7); max-width: 260px; }
 

@@ -90,7 +90,7 @@ public class ClasificadorVeredicto {
             int pctPart = habilitados == 0 ? 0 : (int) Math.round(100.0 * votantes / habilitados);
             return new EvaluacionProcedimiento(PARTICIPACION_INSUFICIENTE, pctGlobal, votantes, habilitados, false, false,
                     "Votó el " + pctPart + " % de la matriz (mínimo " + Math.round(props.participacionMinima() * 100)
-                            + " %): queda como estaba.", areas);
+                            + " %): se mantiene sin cambios.", areas);
         }
 
         List<EvaluacionProcedimiento.Area> conQuorum = areas.stream()
@@ -102,7 +102,7 @@ public class ClasificadorVeredicto {
             veredictos = List.of(clasificarPct(pctGlobal.doubleValue()));
         } else {
             return new EvaluacionProcedimiento(QUORUM_INSUFICIENTE, pctGlobal, votantes, habilitados, false, false,
-                    "Menos de " + props.quorumArea() + " votos: por anonimato no mostramos números y queda como estaba.",
+                    "Menos de " + props.quorumArea() + " votos: por anonimato no se muestran números y se mantiene sin cambios.",
                     areas);
         }
 
@@ -110,7 +110,7 @@ public class ClasificadorVeredicto {
             boolean grupal = conQuorum.size() >= 2;
             String mensaje = grupal
                     ? "Casamiento grupal: 70 % o más en " + nombres(conQuorum, CASAMIENTO) + "."
-                    : "¡Es un match! Preparen la libreta.";
+                    : "Aprobado en todas las áreas: pasa a casamiento.";
             return new EvaluacionProcedimiento(CASAMIENTO, pctGlobal, votantes, habilitados, grupal, false, mensaje, areas);
         }
         if (veredictos.stream().allMatch(v -> v == VELORIO)) {
@@ -119,13 +119,13 @@ public class ClasificadorVeredicto {
                         MENSAJE_OBLIGATORIO + (baseObligatoriedad != null ? " (" + baseObligatoriedad + ")." : "."), areas);
             }
             return new EvaluacionProcedimiento(VELORIO, pctGlobal, votantes, habilitados, false, false,
-                    "Menos del 40 % en todas las áreas: vayan comprando las flores.", areas);
+                    "Menos del 40 % en todas las áreas: pasa a velorio.", areas);
         }
         boolean distancia = veredictos.contains(CASAMIENTO) && veredictos.contains(VELORIO);
         String mensaje = distancia
-                ? "Relación a distancia: le sirve a " + nombres(conQuorum, CASAMIENTO) + " y le sobra a "
+                ? "Relación a distancia: lo aprueba " + nombres(conQuorum, CASAMIENTO) + " y lo rechaza "
                 + nombres(conQuorum, VELORIO) + ". Segunda cita."
-                : "Votos divididos: segunda cita para escuchar a la minoría.";
+                : "Votos divididos: se convoca a segunda cita para escuchar a la minoría.";
         return new EvaluacionProcedimiento(SEGUNDA_CITA, pctGlobal, votantes, habilitados, false, distancia, mensaje, areas);
     }
 

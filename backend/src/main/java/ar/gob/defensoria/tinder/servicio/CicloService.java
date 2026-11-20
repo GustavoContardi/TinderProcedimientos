@@ -173,7 +173,7 @@ public class CicloService {
                     p.setRequiereReformulacion(true);
                     mejoras.crearAutomatica(OrigenMejora.REFORMULACION, String.valueOf(p.getId()), p,
                             "Reformular " + p.getCodigo() + ": " + p.getSegundasCitasConsecutivas()
-                                    + " segundas citas seguidas. Así como está no enamora a nadie.", actorId, null);
+                                    + " segundas citas seguidas sin un resultado claro.", actorId, null);
                     return new Destino(Veredicto.SEGUNDA_CITA, ev.mensaje() + " Ya van "
                             + p.getSegundasCitasConsecutivas() + " segundas citas seguidas: requiere reformulación.");
                 }

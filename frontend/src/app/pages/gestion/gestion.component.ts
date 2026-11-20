@@ -97,7 +97,7 @@ interface FormProc {
         } @else if (ui.ciclo() === null) {
           <div class="ciclo-cerrado">
             <div class="serif" style="font-size: 24px; color: var(--petroleo)">No hay ciclo abierto</div>
-            <div class="nota">Un solo ciclo a la vez. Al abrirlo, los procedimientos en Tinder y en segunda cita vuelven al mazo.</div>
+            <div class="nota">Un solo ciclo a la vez. Al abrirlo, los procedimientos en votación y en segunda cita vuelven al mazo.</div>
             <button class="btn btn-petroleo" style="height: 48px" (click)="abrirCiclo()" [disabled]="ocupado()">
               {{ ocupado() ? 'Abriendo…' : 'Abrir ciclo ' + proximo().nombre }}
             </button>
@@ -232,10 +232,10 @@ interface FormProc {
           <div class="error-form">{{ errorProc() }}</div>
         }
         <button class="btn btn-petroleo" (click)="guardarProc()" [disabled]="ocupado()">
-          {{ ocupado() ? 'Guardando…' : fp.id ? 'Guardar cambios' : 'Publicar en Tinder' }}
+          {{ ocupado() ? 'Guardando…' : fp.id ? 'Guardar cambios' : 'Publicar' }}
         </button>
         @if (fp.id && fpEstado === 'BORRADOR') {
-          <button class="btn btn-ambar" (click)="publicar()" [disabled]="ocupado()">Publicar el borrador en el Tinder</button>
+          <button class="btn btn-ambar" (click)="publicar()" [disabled]="ocupado()">Publicar el borrador</button>
         }
         @if (fp.id) {
           <button class="btn-texto" style="color: var(--rechazo-txt)" (click)="borrarProc()" [disabled]="ocupado()">
@@ -407,7 +407,7 @@ export class GestionComponent implements OnInit {
       next: (c) => {
         this.ocupado.set(false);
         this.resumen.set(null);
-        this.ui.ok(`Ciclo ${c.nombre} abierto. ¡A deslizar!`);
+        this.ui.ok(`Ciclo ${c.nombre} abierto.`);
         this.ui.recargarCiclo();
         this.cargarCiclos();
         this.cargarProcedimientos();
@@ -468,7 +468,7 @@ export class GestionComponent implements OnInit {
   guardarProc(): void {
     const f = this.fp;
     if (!f.codigo.trim() || !f.nombre.trim()) {
-      this.errorProc.set('Falta código y nombre: nadie hace match con un perfil vacío.');
+      this.errorProc.set('Completá el código y el nombre.');
       return;
     }
     if (!f.areaIds.length) {
@@ -498,7 +498,7 @@ export class GestionComponent implements OnInit {
       next: (p) => {
         this.ocupado.set(false);
         this.ui.cerrarHoja();
-        this.ui.ok(f.id ? `Perfil de ${p.codigo} actualizado` : `${p.codigo} ya está en Tinder`);
+        this.ui.ok(f.id ? `Perfil de ${p.codigo} actualizado` : `${p.codigo} ya está en votación`);
         if (!f.id) this.filtro.set('TODOS');
         this.cargarProcedimientos();
       },
@@ -517,7 +517,7 @@ export class GestionComponent implements OnInit {
       next: (p) => {
         this.ocupado.set(false);
         this.ui.cerrarHoja();
-        this.ui.ok(`${p.codigo} salió del borrador: ya está en el Tinder`);
+        this.ui.ok(`${p.codigo} se publicó: ya está en votación`);
         this.cargarProcedimientos();
       },
       error: (e) => {

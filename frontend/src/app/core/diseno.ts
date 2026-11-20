@@ -16,7 +16,7 @@ export type Colores = readonly [string, string, string];
 
 export const ESTADOS: Record<EstadoProcedimiento, Colores> = {
   BORRADOR: ['Borrador', '#ECE8E0', '#4F5958'],
-  EN_TINDER: ['En Tinder', '#F8E1DB', '#8A2F1D'],
+  EN_TINDER: ['En votación', '#F8E1DB', '#8A2F1D'],
   SEGUNDA_CITA: ['Segunda cita', '#FBE9CC', '#6B4300'],
   PENDIENTE_CASAMIENTO: ['Pendiente de casamiento', '#DCEDEA', '#1D5A52'],
   CASADO: ['Casado', '#2E7D73', '#FFFFFF'],
@@ -88,7 +88,7 @@ export const ESTADOS_MEJORA_LISTA = Object.keys(ESTADOS_MEJORA) as EstadoMejora[
 
 /** [título, explicación] */
 export const DECISIONES: Record<DecisionSegundaCita, readonly [string, string]> = {
-  AJUSTAR_Y_REVOTAR: ['Ajustar y revotar', 'El dueño lo edita (versión + 1) y se vuelve a votar: ya, en una votación rápida, o en el próximo Tinder.'],
+  AJUSTAR_Y_REVOTAR: ['Ajustar y revotar', 'El dueño lo edita (versión + 1) y se vuelve a votar: ya, en una votación rápida, o en el próximo ciclo trimestral.'],
   CASAR_CON_CONDICIONES: ['Casar con condiciones', 'Votación rápida de 7 días: con 70 % o más se casa y las condiciones van a la libreta.'],
   VELORIO: ['Velorio', 'Votación rápida de 7 días: con menos de 40 % pasa a pendiente de velorio.'],
 };

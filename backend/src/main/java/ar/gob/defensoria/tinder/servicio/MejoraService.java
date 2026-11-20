@@ -109,7 +109,7 @@ public class MejoraService {
         if (CERRADAS.contains(req.estado()) && respuesta == null) {
             throw ApiException.reglaNegocio("RESPUESTA_OBLIGATORIA", "Para pasar " + m.getCodigo() + " a "
                     + (req.estado() == EstadoMejora.RESUELTA ? "resuelta" : "descartada")
-                    + " contá qué se hizo (o por qué no): nadie queda sin respuesta.");
+                    + " registrá qué se hizo o por qué no se hace: toda mejora se cierra con una respuesta.");
         }
         m.setDescripcion(req.descripcion().trim());
         m.setFechaCompromiso(req.fechaCompromiso());

@@ -15,8 +15,8 @@ public class OpenApiConfig {
     OpenAPI tinderOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Tinder de procedimientos")
-                        .description("Hasta que la burocracia nos separe. Votación anónima de procedimientos ISO 9001.")
+                        .title("Pasá y Rebotá")
+                        .description("Evaluación participativa y anónima de procedimientos ISO 9001.")
                         .version("1.0.0"))
                 .components(new Components().addSecuritySchemes("basicAuth",
                         new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))

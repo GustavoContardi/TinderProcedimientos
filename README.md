@@ -1,13 +1,13 @@
-# 💍 Tinder de procedimientos · v2
+# 💍 Pasá y Rebotá · v2
 
-> *Hasta que la burocracia nos separe.*
+> *Evaluación participativa de procedimientos.*
 
 Prototipo para la Defensoría del Pueblo (Design Thinking · Sistemas de Información IV).
 Maneja el ciclo de vida de los procedimientos de calidad (ISO 9001):
 
 | Etapa | Qué pasa |
 |---|---|
-| 🔥 **Tinder** | Evaluación periódica y **anónima** por quienes usan cada procedimiento (♥ me sirve / ✕ me sobra). La minoría puede **objetar** sin dar su nombre. |
+| 🔥 **Votación** | Evaluación periódica y **anónima** por quienes usan cada procedimiento (♥ me sirve / ✕ me sobra). La minoría puede **objetar** sin dar su nombre. |
 | 💍 **Casamiento** | Aprobación formal con compromiso: libreta con número, versión, % por área, dueño, padrino, testigos, votos, prenup y condiciones. Oficia el **juez de paz**. |
 | ☕ **Segunda cita** | Reunión de 30 minutos con minuta y decisión. Nada cambia sin una **votación rápida** anónima de 7 días. |
 | 🕯️ **Velorio** | Baja controlada con **acta de defunción**: causa, herencia, lecciones, reencarnación y **tres firmas**. El procedimiento queda obsoleto, nunca se borra. |
@@ -80,25 +80,27 @@ Contraseña de todos: **`demo123`**. En el login hay botones para entrar con un 
 
 **Estado de la demo:** 2026-T3 cerrado con PR-03 (86 % / 75 % / 80 % → pendiente de casamiento, grupal), F-07 (55 % → segunda cita, con 4 objeciones *Demasiados pasos*), F-23 (18 %, 6 objeciones *Duplica otro registro* → pendiente de velorio), PR-02 obligatorio (36 % → segunda cita, nunca velorio; ya van 2 seguidas: requiere reformulación), PR-05 (quórum insuficiente en Infraestructura) y PR-01 (participación insuficiente). 2026-T4 abierto. Seis mejoras en distintos estados (una vencida), PR-06 casado con aniversario en 6 días y F-02 en el archivo de obsoletos.
 
-## Guion de demo (4 minutos)
+## Guion de demo de Pasá y Rebotá (4 minutos)
 
+0. **Presentación** (~10 s): abrí http://localhost:4200. El login muestra **Pasá y Rebotá** · *Evaluación participativa de procedimientos* y los botones para entrar con un clic como cada usuario de prueba.
 1. **Empleado: votar y objetar** (`facundo@demo.com`, ~1 min)
    - En **Swipe** aparece *"Votás solo los procedimientos en los que participás"*: el mazo trae solo PR-01, PR-02, PR-04 y F-09 (su matriz). F-07 y F-08 no aparecen.
-   - Cada carta muestra **Dueño** y **Padrino**. Deslizá uno a la derecha (♥) y otro a la izquierda (✕).
-   - Con el ✕ se abre *"¿Por qué te sobra? (opcional, anónimo)"*: elegí una categoría, escribí algo y tocá **Enviar objeción** (o **Saltar**).
+   - Cada carta muestra cuánto tiempo lleva, qué aporta, cuánto se usa, el **dueño** y el **padrino**. Tocá la carta (o el botón ⓘ) para abrir el **detalle completo**: bio, beneficio, áreas y base normativa si es obligatorio. Desde ahí también se puede votar.
+   - Deslizá uno a la derecha (♥ *Me sirve*): aparece el cartel **Voto registrado**, que explica que pasa a casamiento si al cierre alcanza el 70 % en las áreas que lo usan.
+   - Deslizá otro a la izquierda (✕ *Me sobra*): se abre *"¿Por qué te sobra?"* (opcional y anónimo). Elegí una categoría, escribí algo y tocá **Enviar objeción** (o **Saltar**).
 2. **Juez: objeciones, mejoras y segunda cita de F-07** (`juez@demo.com`, ~1 min)
    - **Juez de paz → Objeciones**: agrupadas por procedimiento y categoría, sin autor. Marcá una de F-23 como *Fundada* con su respuesta → aparece el link a la mejora **M-007** creada en el tablero.
-   - **Juez de paz → Segundas citas → F-07**: *Empezar la cita* arranca el cronómetro de 30 min (presentación, debate, propuestas, decisión) y abajo están las 4 objeciones *"Son 5 preguntas, nadie las contesta"*.
+   - **Juez de paz → Segundas citas → F-07** (*Encuesta de satisfacción de la mesa de ayuda*): *Empezar la cita* arranca el cronómetro de 30 min (presentación, debate, propuestas, decisión) y abajo están las 4 objeciones *"La encuesta tiene cinco preguntas y la mayoría de los usuarios no la completa."*.
    - Escribí la minuta, elegí **Casar con condiciones**, escribí las condiciones y tocá **Lanzar votación rápida (7 días)**. (Si entrás como `ana@demo.com`, F-07 aparece con el badge **Votación rápida**.)
 3. **Juez: casamiento grupal de PR-03** (~40 s)
-   - **Registro → Casamientos → Registrar casamiento** en PR-03: *Casamiento grupal con Operaciones, Desarrollo e Infraestructura*. Ya vienen el dueño (Carla) y el padrino (Ana); elegí testigos de Atención al Público; oficia el juez.
+   - **Registro → Casamientos → Registrar casamiento** en PR-03 (*Atención de peticiones urgentes*): *Casamiento grupal con Operaciones, Desarrollo e Infraestructura*. Ya vienen el dueño (Carla) y el padrino (Ana); elegí testigos de Atención al Público; oficia el juez.
    - *Sí, acepto* abre la **libreta L-012/2026** imprimible: versión, % por área (86 / 75 / 80), dueño, padrino, testigos, votos, prenup, condiciones, objeciones tratadas y aniversario.
 4. **Velorio de F-23 con tres firmas** (~1 min)
-   - **Registro → Velorios → Labrar acta de defunción**: título *Acta de defunción N.º 004/2026*, causa y epitafio sugeridos (*"18% de aprobación y 6 objeciones…"*, *"Nos robó 40 minutos por semana"*). Completá herencia y lecciones, y en reencarnación elegí **Crear borrador**: `PR-11` *Parte semanal en el sistema de tickets*.
+   - **Registro → Velorios → Labrar acta de defunción**: título *Acta de defunción N.º 004/2026*, causa y epitafio sugeridos (*"18% de aprobación y 6 objeciones…"*, *"Insumía 40 minutos por semana"*). Completá herencia y lecciones, y en reencarnación elegí **Crear borrador**: `PR-11` *Parte semanal en el sistema de tickets*.
    - En el acta, **Firmar** (mantener apretado) como juez → entrá como `direccion@demo.com` (tiene el badge **1** en Registro) y firmá → entrá como `bruno@demo.com` (dueño) y firmá.
    - Con la tercera firma F-23 queda **VELADO** y aparece en **Registro → Archivo** con su acta y *"Lo reemplaza PR-11"*.
 5. **Tablero de mejoras** (cualquiera, ~20 s)
-   - **Tablero**: kanban NUEVA / EN ANÁLISIS / EN CURSO / RESUELTA / DESCARTADA, con las mejoras nuevas (objeción de F-23, condiciones de F-07, herencia de F-23 y *"Redactar el reemplazo PR-11"*) y la vencida en rojo. Filtrá por procedimiento u origen; al pasar una a *Resuelta* o *Descartada* sin respuesta, no te deja.
+   - **Tablero**: kanban NUEVA / EN ANÁLISIS / EN CURSO / RESUELTA / DESCARTADA, con las mejoras nuevas (objeción de F-23, condiciones de F-07, herencia de F-23 y *"Redactar el reemplazo PR-11 de F-23 (acta 004/2026) y publicarlo en Pasá y Rebotá"*) y la vencida en rojo. Filtrá por procedimiento u origen; al pasar una a *Resuelta* o *Descartada* sin respuesta, no te deja.
 
 Extras: **Aniversarios** (PR-06 cumple 6 meses: informe con objeciones y mejoras abiertas, campo de uso real y *Renovar / Segunda cita / Divorciar*), **Matriz** (grilla usuario × procedimiento con guardado por lote) y **Juez de paz** como Dirección (designación con historial).
 
@@ -116,7 +118,7 @@ Extras: **Aniversarios** (PR-06 cumple 6 meses: informe con objeciones y mejoras
 │       │   ├── config/              # Seguridad (HTTP Basic stateless, CORS), OpenAPI, propiedades "tinder.*"
 │       │   ├── dominio/             # Entidades JPA y enums
 │       │   ├── repositorio/         # Spring Data JPA
-│       │   ├── servicio/            # MaquinaEstados, ClasificadorVeredicto, Tinder, Ciclos, Objeciones, Segundas citas,
+│       │   ├── servicio/            # MaquinaEstados, ClasificadorVeredicto, Votación (mazo), Ciclos, Objeciones, Segundas citas,
 │       │   │                        # Casamientos, Velorios, Mejoras, Matriz, Juez de paz…
 │       │   └── web/                 # Controllers REST, DTOs (records) y @RestControllerAdvice
 │       ├── main/resources/
@@ -208,13 +210,15 @@ Cuando algo era ambiguo se eligió lo más simple que respetara las reglas:
 16. **Juez de paz**: se elige entre la gente del área (422 si no); la Dirección no puede serlo; el anterior vuelve a EMPLEADO si no tiene otra designación vigente.
 17. **Calendario**: "matriz revisada" = una revisión registrada (tabla `matriz_revision`) entre 30 días antes y 7 días después del inicio del ciclo (en la grilla hay "Marcar revisada" aunque no haya cambios); participación = votos emitidos / matriz de los procedimientos votables; ceremonias = nadie pendiente de casamiento ni de velorio sin acta; tablero = ninguna mejora vencida.
 18. **Resultados**: el empleado ve solo las barras de su área (más el resumen global, que es agregado); con quórum insuficiente en el procedimiento no se muestra el %. Se mantienen las **alertas** de la v1 (relación a distancia, obligatorio no velable, casamiento grupal).
-19. **Seed**: el 88 % de PR-03 necesita 8 votos en un área, y el máximo posible con 4 a 6 empleados por área más el juez es 7: Operaciones queda en **86 % (6 de 7)**; 75 % y 80 % son exactos. Se sumó el área **Atención al Público** para que PR-03, que es de las otras tres, tenga testigos. Se agregó el ciclo 2026-T2 para que PR-02 llegue a dos segundas citas seguidas, y el velado F-02 (acta 003/2026) para que el acta de F-23 sea la **004/2026** y la libreta de PR-03 la **L-012/2026**, como en el ejemplo.
+19. **Seed**: el 88 % de PR-03 necesita 8 votos en un área, y el máximo posible con 4 a 6 empleados por área más el juez es 7: Operaciones queda en **86 % (6 de 7)**; 75 % y 80 % son exactos. Se sumó el área **Atención al Público** para que PR-03, que es de las otras tres, tenga testigos. Se agregó el ciclo 2026-T2 para que PR-02 llegue a dos segundas citas seguidas, y el velado F-02 (acta 003/2026) para que el acta de F-23 sea la **004/2026** y la libreta de PR-03 la **L-012/2026**, como en el ejemplo. Los textos de la demo tienen tono formal: no se reescribió el changeset 300, se agregaron `301-seed-demo-textos` (procedimientos) y `302-seed-demo-textos-generales` (resultados, objeciones, minuta, casamiento, acta y mejoras), también con contexto `demo`.
 20. **Frontend**: `/swipe` es la ruta del mazo (`/votar` redirige). `/casamientos`, `/velorios`, `/aniversarios` y `/archivo` son pestañas de Registro. Las páginas del juez (`/matriz`, `/objeciones`, `/segundas-citas`, `/gestion`) cuelgan de **Juez de paz** en la barra de navegación. Se agregó `/mis-procedimientos` (desde el perfil) para que el dueño ajuste su procedimiento.
+21. **Nombre "Pasá y Rebotá"**: el nombre visible de la aplicación (login, encabezado, título de la pestaña, Swagger, `spring.application.name`, `pom.xml`, proyecto Angular) pasó de "Tinder de procedimientos" a **Pasá y Rebotá**, y los textos que decían "el Tinder" dicen "votación" o "ciclo trimestral". Quedan con `tinder` solo los identificadores técnicos, para no romper datos ni sesiones: el paquete Java `ar.gob.defensoria.tinder`, las propiedades `tinder.*`, la ruta `/api/tinder`, el estado `EN_TINDER` (se muestra como "En votación"), la base y el volumen de Docker `tinder`, las claves de `localStorage` y el autor `tinder-v2` de los changesets.
+22. **Tono formal**: los mensajes que genera el backend (veredictos, mejoras automáticas, errores) y los textos de la interfaz se redactaron en tono formal. El cartel "¡Es un match!" pasó a ser **Voto registrado**: aparece con cada voto *Me sirve* (el backend devuelve `match: true` en todo LIKE), así que confirma el voto en lugar de anunciar un acuerdo del área. Se mantienen las metáforas del diseño (casamiento, velorio, segunda cita, padrino, juez de paz) porque son los nombres de las etapas.
 
 ### Decisiones de la v1 que siguen vigentes
 
 - Enums como `VARCHAR` + `CHECK` (no tipos `ENUM` de PostgreSQL): mapean directo con `@Enumerated(STRING)` y pasan `ddl-auto=validate`.
 - Un solo ciclo trimestral abierto (índice parcial único + chequeo en el servicio, 409).
-- Los procedimientos no se borran, se velan: el DELETE solo funciona si nunca entró en juego (borrador o en Tinder sin votos ni resultados).
+- Los procedimientos no se borran, se velan: el DELETE solo funciona si nunca entró en juego (borrador o en votación sin votos ni resultados).
 - 401 sin `WWW-Authenticate` (el navegador no muestra su popup) y frontend → backend vía proxy (`/api` → `localhost:8080`).
 - Angular 19 (cumple "17+"), con signals y control flow nuevo; los tests pedidos son los de JUnit del backend.

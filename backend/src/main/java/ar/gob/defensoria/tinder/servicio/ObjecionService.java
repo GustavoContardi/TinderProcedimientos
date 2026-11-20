@@ -92,7 +92,7 @@ public class ObjecionService {
         String respuesta = blancoANull(req.respuesta());
         if (!req.fundada() && respuesta == null) {
             throw ApiException.reglaNegocio("RESPUESTA_OBLIGATORIA",
-                    "Nadie queda sin respuesta: si no es fundada, explicá por qué.");
+                    "La respuesta es obligatoria: si no es fundada, explicá por qué.");
         }
         Procedimiento p = procedimientos.findById(o.getProcedimientoId())
                 .orElseThrow(() -> ApiException.noEncontrado("No existe el procedimiento " + o.getProcedimientoId()));
@@ -104,7 +104,7 @@ public class ObjecionService {
             String etiqueta = categoriaLegible(o.getCategoria());
             String descripcion = req.fundada()
                     ? "Atender objeción fundada (" + etiqueta + ")" + (o.getTexto() != null ? ": «" + o.getTexto() + "»" : ".")
-                    : "Contarle al equipo por qué no se cambia (" + etiqueta + "): " + respuesta;
+                    : "Informar al equipo por qué no se cambia (" + etiqueta + "): " + respuesta;
             mejoras.crearAutomatica(OrigenMejora.OBJECION, o.getId().toString(), p, descripcion, juez.id(),
                     req.fechaCompromiso());
         } else if (req.fechaCompromiso() != null) {
@@ -147,7 +147,7 @@ public class ObjecionService {
         boolean aniversario = !LocalDate.now().isBefore(c.getFechaAniversario().minusDays(props.diasAvisoAniversario()));
         OrigenObjecion origen = aniversario ? OrigenObjecion.ANIVERSARIO : OrigenObjecion.BODA;
         objeciones.save(new Objecion(p.getId(), null, usuario.areaId(), origen, req.categoria(), blancoANull(req.texto())));
-        return new ObjecionRecibidaDTO(origen, "Objeción recibida, anónima. El juez de paz la va a evaluar: nadie queda sin respuesta.");
+        return new ObjecionRecibidaDTO(origen, "Objeción anónima recibida. El juez de paz la va a evaluar y responder.");
     }
 
     private ObjecionDTO dto(Objecion o, Map<Long, String> nombresCiclo) {

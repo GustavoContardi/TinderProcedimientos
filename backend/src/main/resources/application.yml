@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: tinder-procedimientos
+    name: pasa-y-rebota
   datasource:
     url: jdbc:postgresql://localhost:5432/tinder
     username: tinder
@@ -27,7 +27,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-# Reglas del Tinder (configurables)
+# Reglas de votación de Pasá y Rebotá (configurables)
 tinder:
   umbral-casamiento: 0.70     # % "me sirve" >= 70 en todas las áreas => CASAMIENTO
   umbral-velorio: 0.40        # % "me sirve" < 40 en todas las áreas => VELORIO (si es obligatorio: SEGUNDA_CITA)

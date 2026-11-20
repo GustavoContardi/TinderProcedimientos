@@ -217,7 +217,7 @@ export class TableroComponent implements OnInit {
     const m = this.sel();
     if (!m) return;
     if (this.cierra() && !this.fm.respuesta.trim()) {
-      this.error.set('Para cerrarla contá qué se hizo (o por qué no): nadie queda sin respuesta.');
+      this.error.set('Para cerrarla, registrá qué se hizo o por qué no se hace.');
       return;
     }
     this.ocupado.set(true);
@@ -228,7 +228,7 @@ export class TableroComponent implements OnInit {
           this.ocupado.set(false);
           this.ui.cerrarHoja();
           this.mejoras.update((l) => l.map((x) => (x.id === r.id ? r : x)));
-          this.ui.ok(r.estado === 'RESUELTA' ? `${r.codigo} resuelta. ¡Así da gusto!` : `${r.codigo} actualizada`);
+          this.ui.ok(r.estado === 'RESUELTA' ? `${r.codigo} resuelta.` : `${r.codigo} actualizada`);
         },
         error: (e) => {
           this.ocupado.set(false);

@@ -46,7 +46,7 @@ import { UiService } from '../../core/ui.service';
           }
         </div>
         @if (hechos() !== null) {
-          <p class="pie">{{ hechos() === total() ? '¡Trimestre impecable! Te ganaste un mate.' : hechos() + ' de ' + total() + ' tareas hechas.' }}</p>
+          <p class="pie">{{ hechos() === total() ? 'Todas las tareas del trimestre están completas.' : hechos() + ' de ' + total() + ' tareas hechas.' }}</p>
         }
       } @else {
         <p class="subtitulo">La Dirección es padrino institucional: designa al juez de paz de cada área (rotación anual) y firma las actas.</p>
@@ -173,7 +173,7 @@ export class JuezDePazComponent implements OnInit {
       next: (d) => {
         this.ocupado.set(false);
         this.usuarioId = null;
-        this.ui.ok(`${d.usuarioNombre} es juez de paz de ${d.areaNombre}. ¡Que reine la paz!`);
+        this.ui.ok(`${d.usuarioNombre} es juez de paz de ${d.areaNombre}.`);
         this.cargarHistorial();
         this.api.usuarios().subscribe((u) => this.usuarios.set(u));
       },

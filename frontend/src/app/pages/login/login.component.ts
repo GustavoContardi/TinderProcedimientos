@@ -29,8 +29,8 @@ const CLAVE_DEMO = 'demo123';
     <form class="login" (ngSubmit)="entrar(email, pass)">
       <div class="anillos"></div>
       <div class="kicker">Defensoría del Pueblo · ISO 9001</div>
-      <h1>Tinder de procedimientos</h1>
-      <p class="lema">Hasta que la burocracia nos separe</p>
+      <h1>Pasá y Rebotá</h1>
+      <p class="lema">Evaluación participativa de procedimientos</p>
 
       <div class="campos">
         <input type="email" name="email" placeholder="Email institucional" autocomplete="username" [(ngModel)]="email" />

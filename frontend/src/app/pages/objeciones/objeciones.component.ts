@@ -56,7 +56,7 @@ const ORIGENES: Record<OrigenObjecion, string> = { VOTO: 'Al votar', BODA: 'En l
                         <button [class.on]="b(o).fundada === true" (click)="b(o).fundada = true"><span class="ms">thumb_up</span>Fundada</button>
                         <button [class.on]="b(o).fundada === false" (click)="b(o).fundada = false"><span class="ms">thumb_down</span>No fundada</button>
                       </div>
-                      <textarea rows="2" [(ngModel)]="b(o).respuesta" placeholder="Respuesta (obligatoria): nadie queda sin respuesta"></textarea>
+                      <textarea rows="2" [(ngModel)]="b(o).respuesta" placeholder="Respuesta (obligatoria)"></textarea>
                       <label class="fecha">Mejora para el <input type="date" [(ngModel)]="b(o).fecha" /> <span class="meta">(por defecto, 30 días)</span></label>
                       @if (b(o).error) { <div class="error-form">{{ b(o).error }}</div> }
                       <button class="btn btn-petroleo guardar" (click)="evaluar(o)" [disabled]="b(o).ocupado">{{ b(o).ocupado ? 'Guardando…' : 'Responder' }}</button>
@@ -78,7 +78,7 @@ const ORIGENES: Record<OrigenObjecion, string> = { VOTO: 'Al votar', BODA: 'En l
             }
           </div>
         } @empty {
-          <div class="vacio-italico">{{ soloPendientes() ? 'Nadie se queja. ¿Será amor o miedo?' : 'Todavía no hay objeciones.' }}</div>
+          <div class="vacio-italico">{{ soloPendientes() ? 'No hay objeciones pendientes.' : 'Todavía no hay objeciones.' }}</div>
         }
       </div>
     </div>
@@ -163,7 +163,7 @@ export class ObjecionesComponent implements OnInit {
       return;
     }
     if (!x.respuesta.trim()) {
-      x.error = 'Escribí la respuesta: nadie queda sin respuesta.';
+      x.error = 'La respuesta es obligatoria.';
       return;
     }
     x.error = null;

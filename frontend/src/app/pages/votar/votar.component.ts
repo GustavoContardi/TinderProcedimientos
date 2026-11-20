@@ -66,7 +66,7 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
       <div class="vacio-punteado">
         <span class="ms" style="font-size: 40px; color: var(--gris-claro)">bedtime</span>
         <h2>No hay ciclo de votación abierto</h2>
-        <p>El juez de paz todavía no abrió el trimestre. Mientras tanto, mirá los resultados o andá a un casamiento.</p>
+        <p>El juez de paz todavía no abrió el trimestre. Mientras tanto, podés consultar los resultados y el registro.</p>
       </div>
     } @else if (!actual()) {
       <div class="vacio-punteado">
@@ -113,9 +113,9 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
                   <span class="k"><span class="ms">redeem</span>Te doy</span><span class="v largo">{{ c.p.beneficio }}</span>
                   <span class="k"><span class="ms">group</span>Me usan</span><span class="v">{{ uso(c.p) }}</span>
                   <span class="k"><span class="ms">person</span>Dueño</span>
-                  <span class="v" [class.huerfano]="!c.p.duenoNombre">{{ c.p.duenoNombre ?? 'sin dueño (¡ojo!)' }}</span>
+                  <span class="v" [class.huerfano]="!c.p.duenoNombre">{{ c.p.duenoNombre ?? 'sin dueño asignado' }}</span>
                   <span class="k"><span class="ms">volunteer_activism</span>Padrino</span>
-                  <span class="v" [class.huerfano]="!c.p.padrinoNombre">{{ c.p.padrinoNombre ?? 'nadie se hace cargo' }}</span>
+                  <span class="v" [class.huerfano]="!c.p.padrinoNombre">{{ c.p.padrinoNombre ?? 'sin padrino' }}</span>
                 </div>
               </div>
               <div class="lavado" [style.background]="sirveOp() >= sobraOp() ? '#2E7D73' : '#D0573F'" [style.opacity]="c.arriba ? prog() * .06 : 0"></div>
@@ -153,9 +153,9 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
           <span class="k"><span class="ms">redeem</span>Te doy</span><span class="v">{{ d.beneficio }}</span>
           <span class="k"><span class="ms">group</span>Me usan</span><span class="v">{{ uso(d) }}</span>
           <span class="k"><span class="ms">person</span>Dueño</span>
-          <span class="v" [class.huerfano]="!d.duenoNombre">{{ d.duenoNombre ?? 'sin dueño (¡ojo!)' }}</span>
+          <span class="v" [class.huerfano]="!d.duenoNombre">{{ d.duenoNombre ?? 'sin dueño asignado' }}</span>
           <span class="k"><span class="ms">volunteer_activism</span>Padrino</span>
-          <span class="v" [class.huerfano]="!d.padrinoNombre">{{ d.padrinoNombre ?? 'nadie se hace cargo' }}</span>
+          <span class="v" [class.huerfano]="!d.padrinoNombre">{{ d.padrinoNombre ?? 'sin padrino' }}</span>
           <span class="k"><span class="ms">apartment</span>Áreas</span><span class="v">{{ d.areas.join(' · ') }}</span>
           @if (d.obligatorio) {
             <span class="k"><span class="ms">gavel</span>Obligatorio</span><span class="v">{{ d.baseObligatoriedad ?? 'Por norma' }}</span>
@@ -171,7 +171,7 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
 
     <ng-template #hojaObjecion>
       <div class="titulo-hoja">¿Por qué te sobra?</div>
-      <p class="sub-hoja">Opcional y anónimo: no queda tu nombre en ningún lado. El juez de paz la lee y nadie queda sin respuesta.</p>
+      <p class="sub-hoja">Opcional y anónimo: no queda tu nombre en ningún lado. El juez de paz la evalúa y la responde.</p>
       <div class="form">
         <label class="campo">
           <span>Categoría</span>
@@ -184,7 +184,7 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
         </label>
         <label class="campo">
           <span>Contanos un poco más (opcional)</span>
-          <textarea rows="3" maxlength="1000" [(ngModel)]="obj.texto" name="texto" placeholder="Ej.: son 5 preguntas y nadie las contesta"></textarea>
+          <textarea rows="3" maxlength="1000" [(ngModel)]="obj.texto" name="texto" placeholder="Ej.: la encuesta es demasiado extensa para completarla después de cada ticket"></textarea>
         </label>
         @if (errorObj()) {
           <div class="error-form">{{ errorObj() }}</div>
@@ -362,7 +362,7 @@ export class VotarComponent implements OnInit {
     const n = this.votados();
     const c = this.ui.ciclo();
     const votaste = n ? `Votaste ${n} ${n === 1 ? 'procedimiento' : 'procedimientos'}. ` : 'Ya votaste todo el mazo. ';
-    return c ? `${votaste}El ciclo ${c.nombre} cierra el ${fDiaMes(c.fechaFin)}: ahí se sabe quién se casa y quién se va.` : votaste;
+    return c ? `${votaste}El ciclo ${c.nombre} cierra el ${fDiaMes(c.fechaFin)}: en ese momento se publican los resultados.` : votaste;
   });
 
   constructor() {

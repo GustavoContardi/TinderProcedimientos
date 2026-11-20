@@ -13,8 +13,8 @@
     <groupId>ar.gob.defensoria</groupId>
     <artifactId>tinder-procedimientos</artifactId>
     <version>1.0.0</version>
-    <name>tinder-procedimientos</name>
-    <description>Tinder de procedimientos ISO 9001 - Defensoría del Pueblo</description>
+    <name>pasa-y-rebota</name>
+    <description>Pasá y Rebotá: evaluación participativa de procedimientos ISO 9001 - Defensoría del Pueblo</description>
 
     <properties>
         <java.version>21</java.version>

@@ -102,7 +102,7 @@ import { UiService } from '../../core/ui.service';
           </div>
         } @empty {
           @if (!cargando()) {
-            <div class="vacio-italico">Todavía no hay resultados: se calculan cuando el juez de paz cierra el ciclo. Paciencia, que el amor tarda.</div>
+            <div class="vacio-italico">Todavía no hay resultados: se calculan cuando el juez de paz cierra el ciclo.</div>
           }
         }
       </div>

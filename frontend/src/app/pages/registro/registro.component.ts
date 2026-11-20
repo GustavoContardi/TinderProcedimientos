@@ -79,7 +79,7 @@ const ETIQUETAS: Record<Pestania, string> = {
               }
             </div>
           } @empty {
-            <div class="vacio-italico">Todavía no hubo casamientos. El amor está en el aire (o en el próximo Tinder).</div>
+            <div class="vacio-italico">Todavía no hubo casamientos.</div>
           }
         </div>
       }
@@ -132,7 +132,7 @@ const ETIQUETAS: Record<Pestania, string> = {
             <div class="tarjeta aniv">
               <div class="fila" style="align-items: flex-start; gap: 14px">
                 <div class="caja-dias" [class.vencido]="a.casamiento.diasParaAniversario < 0">
-                  <div class="num">{{ a.casamiento.diasParaAniversario === 0 ? '¡Hoy!' : abs(a.casamiento.diasParaAniversario) }}</div>
+                  <div class="num">{{ a.casamiento.diasParaAniversario === 0 ? 'Hoy' : abs(a.casamiento.diasParaAniversario) }}</div>
                   <div class="unid">{{ a.casamiento.diasParaAniversario > 0 ? 'días' : a.casamiento.diasParaAniversario < 0 ? 'vencido' : '' }}</div>
                 </div>
                 <div class="flex" style="min-width: 0">
@@ -199,7 +199,7 @@ const ETIQUETAS: Record<Pestania, string> = {
               }
             </div>
           } @empty {
-            <div class="vacio-italico">El archivo está vacío: todavía no se veló a nadie.</div>
+            <div class="vacio-italico">El archivo está vacío: todavía no hay procedimientos velados.</div>
           }
         </div>
       }
@@ -652,7 +652,7 @@ export class RegistroComponent {
         fecha: hoyIso(),
         causa: f.causa,
         epitafio: f.epitafio,
-        deudos: 'nadie',
+        deudos: 'ninguno',
         herencia: f.herencia.trim() || null,
         lecciones: f.lecciones.trim() || null,
         reencarnacionId: f.reemplazo === 'existente' ? f.reencarnacionId : null,
@@ -682,7 +682,7 @@ export class RegistroComponent {
       next: () => {
         this.ocupado.set(false);
         const textos = {
-          renovar: 'Votos renovados por 6 meses más. ¡Que vivan los novios!',
+          renovar: 'Votos renovados por 6 meses más.',
           'segunda-cita': `${c.codigo} vuelve a segunda cita: hay cosas que hablar`,
           divorciar: c.obligatorio ? `${c.codigo} vuelve a segunda cita (es obligatorio)` : `${c.codigo} pasa a pendiente de velorio`,
         };

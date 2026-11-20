@@ -56,7 +56,7 @@ const BLOQUES: readonly (readonly [number, number, string])[] = [
                 @if (c.cicloRapido; as r) {
                   <div class="meta"><span class="ms" style="font-size: 14px">bolt</span><span>{{ r.nombre }} · {{ r.estado === 'ABIERTO' ? 'votando hasta el ' + fDiaMes(r.fechaFin) : 'cerrada' }}</span></div>
                 } @else {
-                  <div class="meta">Espera al próximo Tinder.</div>
+                  <div class="meta">Espera al próximo ciclo trimestral.</div>
                 }
               </div>
             }
@@ -126,7 +126,7 @@ const BLOQUES: readonly (readonly [number, number, string])[] = [
           }
           @if (error()) { <div class="error-form">{{ error() }}</div> }
           @if (f.decision === 'AJUSTAR_Y_REVOTAR') {
-            <button class="btn btn-petroleo" (click)="realizar(false)" [disabled]="ocupado()">Esperar al próximo Tinder</button>
+            <button class="btn btn-petroleo" (click)="realizar(false)" [disabled]="ocupado()">Esperar al próximo ciclo</button>
           }
           <button class="btn btn-ambar" (click)="realizar(true)" [disabled]="ocupado() || !f.decision">
             <span class="ms">bolt</span>{{ ocupado() ? 'Lanzando…' : 'Lanzar votación rápida (7 días)' }}
@@ -208,7 +208,7 @@ export class SegundasCitasComponent implements OnInit, OnDestroy {
     return i === -1 ? BLOQUES.length : i;
   });
   readonly bloqueActual = computed(() =>
-    this.segundos() >= DURACION ? '¡Tiempo! A decidir' : this.segundos() === 0 ? 'Lista para empezar' : BLOQUES[this.indiceBloque()][2],
+    this.segundos() >= DURACION ? 'Tiempo cumplido: corresponde decidir' : this.segundos() === 0 ? 'Lista para empezar' : BLOQUES[this.indiceBloque()][2],
   );
 
   ngOnInit(): void {
@@ -294,8 +294,8 @@ export class SegundasCitasComponent implements OnInit, OnDestroy {
           this.ocupado.set(false);
           this.ui.ok(
             r.cicloRapido
-              ? `Votación rápida abierta hasta el ${fDiaMes(r.cicloRapido.fechaFin)}. ¡Que voten!`
-              : `${r.procedimiento.codigo} espera al próximo Tinder. El dueño ya puede ajustarlo.`,
+              ? `Votación rápida abierta hasta el ${fDiaMes(r.cicloRapido.fechaFin)}.`
+              : `${r.procedimiento.codigo} espera al próximo ciclo trimestral. El dueño ya puede ajustarlo.`,
           );
           this.ui.avisarCambio();
           this.cerrar();

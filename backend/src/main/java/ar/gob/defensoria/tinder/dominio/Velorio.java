@@ -38,7 +38,7 @@ public class Velorio {
     private int minutosSemanalesPerdidos;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String deudos = "nadie";
+    private String deudos = "ninguno";
 
     /** Lo que se rescata del difunto y pasa a otro lado. */
     @Column(columnDefinition = "TEXT")

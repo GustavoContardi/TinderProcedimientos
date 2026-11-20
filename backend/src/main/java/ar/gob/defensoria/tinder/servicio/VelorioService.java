@@ -50,12 +50,12 @@ public class VelorioService {
         Procedimiento p = pendienteDeVelorio(procedimientoId);
         int minutos = p.minutosSemanales();
         return new SugerenciaVelorioDTO(p.getId(), p.getCodigo(), p.getNombre(), causaSugerida(p),
-                epitafioSugerido(minutos), minutos, "nadie", Mapeador.nombre(p.getDueno()),
+                epitafioSugerido(minutos), minutos, "ninguno", Mapeador.nombre(p.getDueno()),
                 siguienteNumeroActa(LocalDate.now()));
     }
 
     public static String epitafioSugerido(int minutos) {
-        return "Nos robó " + minutos + " minutos por semana";
+        return "Insumía " + minutos + " minutos por semana";
     }
 
     /** "{pct}% de aprobación y {n} objeciones" más las 2 categorías de objeción más frecuentes. */
@@ -70,7 +70,7 @@ public class VelorioService {
                     return total == 0 ? null : Mapeador.pct(ClasificadorVeredicto.pct(likes, total - likes));
                 });
         List<Objecion> lista = objeciones.findByProcedimientoId(p.getId());
-        StringBuilder causa = new StringBuilder(pct != null ? pct + "% de aprobación" : "Sin votos que lo defiendan")
+        StringBuilder causa = new StringBuilder(pct != null ? pct + "% de aprobación" : "Sin votos a favor")
                 .append(" y ").append(lista.size()).append(lista.size() == 1 ? " objeción" : " objeciones");
         List<String> top = lista.stream()
                 .collect(Collectors.groupingBy(Objecion::getCategoria, () -> new EnumMap<>(CategoriaObjecion.class),
@@ -126,7 +126,7 @@ public class VelorioService {
         Velorio v = velorios.save(new Velorio(siguienteNumeroActa(fecha), p, fecha,
                 causa != null ? causa : causaSugerida(p),
                 epitafio != null ? epitafio : epitafioSugerido(minutos),
-                minutos, deudos != null ? deudos : "nadie", herencia, blancoANull(req.lecciones()), reencarnacion, motivo));
+                minutos, deudos != null ? deudos : "ninguno", herencia, blancoANull(req.lecciones()), reencarnacion, motivo));
 
         String acta = "acta " + v.getNumeroActa();
         if (herencia != null) {
@@ -136,7 +136,7 @@ public class VelorioService {
         if (reencarnacion != null && reencarnacion.getEstado() == EstadoProcedimiento.BORRADOR) {
             mejoras.crearAutomatica(OrigenMejora.ACTA_DEFUNCION, String.valueOf(v.getId()), reencarnacion,
                     "Redactar el reemplazo " + reencarnacion.getCodigo() + " de " + p.getCodigo() + " (" + acta
-                            + ") y publicarlo en el Tinder.", juez.id(), null);
+                            + ") y publicarlo en Pasá y Rebotá.", juez.id(), null);
         }
         return Mapeador.velorio(v);
     }

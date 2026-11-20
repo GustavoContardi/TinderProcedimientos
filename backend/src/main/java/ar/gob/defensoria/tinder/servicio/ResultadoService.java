@@ -82,11 +82,11 @@ public class ResultadoService {
         boolean ocultar = r.getVeredicto() == Veredicto.QUORUM_INSUFICIENTE;
         Integer pctLike = ocultar ? null : Mapeador.pct(r.getPctLike());
         String mensaje = switch (r.getVeredicto()) {
-            case CASAMIENTO -> "70 % o más: a esta área le sirve.";
-            case VELORIO -> "Menos del 40 %: a esta área le sobra.";
-            case SEGUNDA_CITA -> "Entre 40 % y 70 %: ni fu ni fa.";
-            case QUORUM_INSUFICIENTE -> "Pocos votos, por anonimato no mostramos números";
-            case PARTICIPACION_INSUFICIENTE -> "Votó muy poca gente de la matriz.";
+            case CASAMIENTO -> "70 % o más: esta área lo aprueba.";
+            case VELORIO -> "Menos del 40 %: esta área lo rechaza.";
+            case SEGUNDA_CITA -> "Entre 40 % y 70 %: resultado dividido.";
+            case QUORUM_INSUFICIENTE -> "Votos insuficientes: por anonimato no se muestran números.";
+            case PARTICIPACION_INSUFICIENTE -> "Participación insuficiente de la matriz.";
         };
         return new ResultadoDTO(r.getCiclo().getId(), r.getCiclo().getNombre(), p.getId(), p.getCodigo(), p.getNombre(),
                 r.getArea().getId(), r.getArea().getNombre(), r.getVeredicto(),

@@ -64,13 +64,13 @@ const MS_FIRMA = 1300;
                 }
               </ul>
             } @else {
-              <p class="nadie">Nadie se opuso. Que hablen ahora o callen para siempre.</p>
+              <p class="nadie">No se registraron oposiciones.</p>
             }
             @if (c.informeAniversario) {
               <div class="seccion">Informe de aniversario · uso real</div>
               <div class="express">{{ c.informeAniversario }}</div>
             }
-            <p class="lema">«Hasta que la burocracia nos separe»</p>
+            <p class="lema">«Mientras siga siendo útil»</p>
             <div class="firmas"><div>Juez de paz</div><div>Dueño</div><div>Padrino</div></div>
           </div>
         }

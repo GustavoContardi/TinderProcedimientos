@@ -4,7 +4,7 @@
   "newProjectRoot": "projects",
   "cli": { "analytics": false },
   "projects": {
-    "tinder-procedimientos": {
+    "pasa-y-rebota": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": { "style": "scss", "standalone": true }
@@ -16,7 +16,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/tinder-procedimientos",
+            "outputPath": "dist/pasa-y-rebota",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -45,8 +45,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": { "proxyConfig": "proxy.conf.json" },
           "configurations": {
-            "production": { "buildTarget": "tinder-procedimientos:build:production" },
-            "development": { "buildTarget": "tinder-procedimientos:build:development" }
+            "production": { "buildTarget": "pasa-y-rebota:build:production" },
+            "development": { "buildTarget": "pasa-y-rebota:build:development" }
           },
           "defaultConfiguration": "development"
         }

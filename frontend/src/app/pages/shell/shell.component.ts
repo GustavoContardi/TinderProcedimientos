@@ -40,7 +40,7 @@ const ROLES: Record<Rol, string> = { EMPLEADO: 'Empleado/a', JUEZ_PAZ: 'Juez de 
   template: `
     <header class="cab">
       <div class="anillos" style="--d: 20px; --b: 2.5px"></div>
-      <div class="marca"><span class="t">Tinder</span><span class="s">de procedimientos</span></div>
+      <div class="marca"><span class="t">Pasá y Rebotá</span><span class="s">Procedimientos</span></div>
       <div class="flex"></div>
       <span class="ciclo">
         <span class="punto" [style.background]="ui.ciclo() ? '#2E7D73' : '#8A9699'"></span>
@@ -88,10 +88,10 @@ const ROLES: Record<Rol, string> = { EMPLEADO: 'Empleado/a', JUEZ_PAZ: 'Juez de 
     :host { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .cab { flex: none; display: flex; align-items: center; gap: 10px; padding: 16px 18px 10px; }
     .marca { display: flex; flex-direction: column; line-height: 1; }
-    .marca .t { font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--petroleo); }
+    .marca .t { font-family: var(--serif); font-size: 19px; white-space: nowrap; font-weight: 600; color: var(--petroleo); }
     .marca .s { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gris); margin-top: 3px; }
     .ciclo {
-      display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+      flex: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
       background: var(--papel); border: 1px solid rgba(18,52,59,.09); font-size: 12px; font-weight: 500; color: var(--petroleo);
     }
     .punto { width: 7px; height: 7px; border-radius: 50%; }

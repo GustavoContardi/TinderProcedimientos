@@ -10,7 +10,7 @@ public record ProcedimientoRequest(
         @NotBlank(message = "El código es obligatorio (ej. PR-07)") @Size(max = 20) String codigo,
         @NotBlank(message = "El nombre es obligatorio") @Size(max = 200) String nombre,
         @NotNull(message = "El tipo es obligatorio") TipoProcedimiento tipo,
-        @NotBlank(message = "Sin bio no hay match: escribí algo") String bio,
+        @NotBlank(message = "La bio es obligatoria") String bio,
         @NotNull(message = "Falta la fecha de creación") @PastOrPresent(message = "No puede haber nacido en el futuro") LocalDate fechaCreacion,
         @NotNull @Min(value = 0, message = "Los minutos por uso no pueden ser negativos") Integer minutosPorUso,
         @NotNull @Min(value = 0, message = "Los usos por semana no pueden ser negativos") Integer usosPorSemana,

@@ -59,7 +59,7 @@ public class CasamientoService {
         }
         if (objeciones.existsByProcedimientoIdAndFundadaTrueAndRespuestaIsNull(p.getId())) {
             throw ApiException.reglaNegocio("OBJECION_SIN_RESPUESTA", p.getCodigo()
-                    + " tiene objeciones fundadas sin respuesta: nadie se casa con cuentas pendientes.");
+                    + " tiene objeciones fundadas sin respuesta: hay que responderlas antes del casamiento.");
         }
         Usuario oficiante = usuario(req.oficianteId());
         if (oficiante.getRol() != Rol.JUEZ_PAZ) {

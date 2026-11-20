@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tinder")
-@Tag(name = "Tinder", description = "Mazo y voto anónimo")
+@Tag(name = "Votación", description = "Mazo y voto anónimo")
 public class TinderController {
 
     private final TinderService tinder;

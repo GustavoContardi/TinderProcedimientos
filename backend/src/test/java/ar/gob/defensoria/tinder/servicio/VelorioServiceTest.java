@@ -58,7 +58,7 @@ class VelorioServiceTest {
     }
 
     private Velorio acta() {
-        Velorio v = new Velorio("004/2026", f23, LocalDate.now(), "causa", "epitafio", 40, "nadie", null, null, null,
+        Velorio v = new Velorio("004/2026", f23, LocalDate.now(), "causa", "epitafio", 40, "ninguno", null, null, null,
                 "Lo reemplaza el sistema de tickets");
         v.setId(4L);
         when(velorios.findById(4L)).thenReturn(Optional.of(v));
@@ -127,7 +127,7 @@ class VelorioServiceTest {
         assertThat(dto.numeroActa()).isEqualTo("004/" + LocalDate.now().getYear());
         assertThat(dto.reencarnacionCodigo()).isEqualTo("PR-11");
         assertThat(dto.reencarnacionEstado()).isEqualTo(EstadoProcedimiento.BORRADOR);
-        assertThat(dto.epitafio()).isEqualTo("Nos robó 40 minutos por semana");
+        assertThat(dto.epitafio()).isEqualTo("Insumía 40 minutos por semana");
         ArgumentCaptor<Mejora> m = ArgumentCaptor.forClass(Mejora.class);
         verify(mejoraRepo, times(2)).save(m.capture());
         assertThat(m.getAllValues()).allMatch(x -> x.getOrigen() == OrigenMejora.ACTA_DEFUNCION);
