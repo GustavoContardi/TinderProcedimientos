@@ -1,4 +1,7 @@
-import { Component, HostListener, OnInit, TemplateRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import {
+  AfterViewInit, Component, Directive, ElementRef, HostListener, OnDestroy, OnInit, TemplateRef, computed, effect, inject, signal,
+  untracked, viewChild,
+} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,10 +15,41 @@ import { UiService } from '../../core/ui.service';
 const UMBRAL = 110;
 const MS_SALIDA = 360;
 const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
+/** Movimiento máximo (px) para que soltar la carta cuente como un toque (abre el detalle). */
+const TOQUE = 6;
+
+/**
+ * Recorta la bio en líneas enteras según el alto que le queda a la carta
+ * (depende del largo del nombre y de cuántas líneas ocupa "Te doy").
+ */
+@Directive({ selector: '[appRecorteLineas]' })
+export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
+  private readonly caja: HTMLElement = inject(ElementRef).nativeElement;
+  private observador?: ResizeObserver;
+
+  ngAfterViewInit(): void {
+    this.observador = new ResizeObserver(() => this.ajustar());
+    this.observador.observe(this.caja);
+    this.ajustar();
+  }
+
+  ngOnDestroy(): void {
+    this.observador?.disconnect();
+  }
+
+  private ajustar(): void {
+    const texto = this.caja.firstElementChild as HTMLElement | null;
+    if (!texto) return;
+    const alto = parseFloat(getComputedStyle(texto).lineHeight) || 22;
+    const lineas = Math.floor((this.caja.clientHeight + 1) / alto);
+    texto.style.display = lineas < 1 ? 'none' : '';
+    texto.style.setProperty('-webkit-line-clamp', String(Math.max(1, lineas)));
+  }
+}
 
 @Component({
   selector: 'app-votar',
-  imports: [FormsModule],
+  imports: [FormsModule, RecorteLineasDirective],
   template: `
     <div class="cab">
       <h1 class="titulo-pagina">¿Te sirve o te sobra?</h1>
@@ -47,7 +81,7 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
           <div class="pos" [class.arriba]="c.arriba" [class.agarrando]="c.arriba && arrastrando()"
                [style.transform]="c.arriba ? tArriba() : tAtras()" [style.transition]="transicion()"
                (pointerdown)="apretar($event, c.arriba)" (pointermove)="mover($event)"
-               (pointerup)="soltar()" (pointercancel)="soltar()">
+               (pointerup)="soltar()" (pointercancel)="cancelar()">
             <div class="carta" [style.boxShadow]="c.arriba ? (arrastrando() ? '0 22px 44px rgba(18,52,59,.2)' : '0 12px 30px rgba(18,52,59,.13)') : '0 4px 14px rgba(18,52,59,.08)'">
               <div class="tapa">
                 <div class="fila">
@@ -59,6 +93,12 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
                   @if (c.p.obligatorio) {
                     <span class="oblig" [title]="c.p.baseObligatoriedad ?? ''"><span class="ms">gavel</span>Obligatorio por norma</span>
                   }
+                  @if (c.arriba) {
+                    <button class="info" title="Ver el detalle completo" aria-label="Ver el detalle completo"
+                            (pointerdown)="$event.stopPropagation()" (click)="abrirDetalle(c.p)">
+                      <span class="ms">info</span>
+                    </button>
+                  }
                 </div>
                 <div class="pie-tapa">
                   <span class="cod">{{ c.p.codigo }}@if (c.p.version > 1) {<small> v{{ c.p.version }}</small>}</span>
@@ -67,10 +107,10 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
               </div>
               <div class="cuerpo">
                 <h2>{{ c.p.nombre }}, <span class="edad">{{ c.p.edadAnios }} {{ c.p.edadAnios === 1 ? 'año' : 'años' }}</span></h2>
-                <p class="bio">“{{ c.p.bio }}”</p>
+                <div class="bio-caja" appRecorteLineas><p class="bio">“{{ c.p.bio }}”</p></div>
                 <div class="datos">
                   <span class="k"><span class="ms">schedule</span>Te llevo</span><span class="v">{{ c.p.minutosPorUso }} min</span>
-                  <span class="k"><span class="ms">redeem</span>Te doy</span><span class="v">{{ c.p.beneficio }}</span>
+                  <span class="k"><span class="ms">redeem</span>Te doy</span><span class="v largo">{{ c.p.beneficio }}</span>
                   <span class="k"><span class="ms">group</span>Me usan</span><span class="v">{{ uso(c.p) }}</span>
                   <span class="k"><span class="ms">person</span>Dueño</span>
                   <span class="v" [class.huerfano]="!c.p.duenoNombre">{{ c.p.duenoNombre ?? 'sin dueño (¡ojo!)' }}</span>
@@ -96,6 +136,38 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
     }
 
     <div class="anonimo"><span class="ms">lock</span>Tu voto es anónimo: solo se ven resultados por área</div>
+
+    <ng-template #hojaDetalle>
+      @if (detalle(); as d) {
+        <div class="det-cab">
+          <span class="det-cod">{{ d.codigo }}@if (d.version > 1) {<small> v{{ d.version }}</small>}</span>
+          <span class="det-tipo"><span class="ms">{{ iconoTipo(d.tipo) }}</span>{{ d.tipo === 'REGISTRO' ? 'Registro' : 'Procedimiento' }}</span>
+          @if (d.votacionRapida) {
+            <span class="rapida"><span class="ms">bolt</span>Votación rápida</span>
+          }
+        </div>
+        <div class="titulo-hoja">{{ d.nombre }}, <span class="edad">{{ d.edadAnios }} {{ d.edadAnios === 1 ? 'año' : 'años' }}</span></div>
+        <p class="det-bio">“{{ d.bio }}”</p>
+        <div class="det-datos">
+          <span class="k"><span class="ms">schedule</span>Te llevo</span><span class="v">{{ d.minutosPorUso }} min por uso</span>
+          <span class="k"><span class="ms">redeem</span>Te doy</span><span class="v">{{ d.beneficio }}</span>
+          <span class="k"><span class="ms">group</span>Me usan</span><span class="v">{{ uso(d) }}</span>
+          <span class="k"><span class="ms">person</span>Dueño</span>
+          <span class="v" [class.huerfano]="!d.duenoNombre">{{ d.duenoNombre ?? 'sin dueño (¡ojo!)' }}</span>
+          <span class="k"><span class="ms">volunteer_activism</span>Padrino</span>
+          <span class="v" [class.huerfano]="!d.padrinoNombre">{{ d.padrinoNombre ?? 'nadie se hace cargo' }}</span>
+          <span class="k"><span class="ms">apartment</span>Áreas</span><span class="v">{{ d.areas.join(' · ') }}</span>
+          @if (d.obligatorio) {
+            <span class="k"><span class="ms">gavel</span>Obligatorio</span><span class="v">{{ d.baseObligatoriedad ?? 'Por norma' }}</span>
+          }
+        </div>
+        <div class="det-votar">
+          <button class="btn det-nope" (click)="votarDesdeDetalle('NOPE')"><span class="ms">close</span>Me sobra</button>
+          <button class="btn btn-match" (click)="votarDesdeDetalle('LIKE')"><span class="ms relleno">favorite</span>Me sirve</button>
+        </div>
+        <button class="btn-texto" (click)="ui.cerrarHoja()">Volver al mazo</button>
+      }
+    </ng-template>
 
     <ng-template #hojaObjecion>
       <div class="titulo-hoja">¿Por qué te sobra?</div>
@@ -145,7 +217,7 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
     .pos.agarrando { cursor: grabbing; }
     .carta { position: relative; height: 100%; border-radius: 28px; background: var(--papel); overflow: hidden; display: flex; flex-direction: column; container: carta / size; }
     .tapa {
-      flex: none; height: 38%; min-height: 150px; padding: 16px 18px 18px; display: flex; flex-direction: column; color: var(--crema);
+      flex: none; height: 32%; min-height: 136px; padding: 16px 18px 16px; display: flex; flex-direction: column; color: var(--crema);
       background-color: var(--petroleo); background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0 1px, transparent 1px 9px);
     }
     .fila { display: flex; align-items: center; gap: 6px; }
@@ -156,19 +228,15 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
     .pie-tapa { flex: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
     .cod { font-family: var(--serif); font-size: 62px; line-height: .85; letter-spacing: -.03em; white-space: nowrap; }
     .areas { font-size: 11.5px; line-height: 1.35; text-align: right; color: rgba(245,240,230,.72); max-width: 46%; }
-    .cuerpo { flex: 1; min-height: 0; padding: 18px 20px 14px; display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; container: cuerpo / size; }
+    .cuerpo { flex: 1; min-height: 0; padding: 16px 20px 12px; display: flex; flex-direction: column; gap: 8px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
     .cuerpo h2 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.08; letter-spacing: -.015em; color: var(--petroleo); text-wrap: balance; }
     .edad { color: #7E8C8F; font-weight: 400; }
+    /* La caja de la bio ocupa lo que sobra entre el nombre y los datos; RecorteLineasDirective corta en líneas enteras */
+    .bio-caja { flex: 1 1 0; min-height: 0; overflow: hidden; }
     .bio {
       margin: 0; font-family: var(--serif); font-style: italic; font-size: 16.5px; line-height: 1.38; color: var(--texto-2); text-wrap: pretty;
-      flex: none; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
-    /* La bio se recorta en líneas enteras según el alto que le queda a la carta */
-    /* (umbrales pensados para 5 filas de datos: te llevo, te doy, me usan, dueño y padrino) */
-    @container cuerpo (max-height: 329px) { .bio { -webkit-line-clamp: 3; } }
-    @container cuerpo (max-height: 306px) { .bio { -webkit-line-clamp: 2; } }
-    @container cuerpo (max-height: 283px) { .bio { -webkit-line-clamp: 1; } }
-    @container cuerpo (max-height: 260px) { .bio { display: none; } }
     /* Pantallas bajas (ventana chica o celular con barra): tapa más baja y datos más apretados */
     @container carta (max-height: 420px) {
       .tapa { height: auto; min-height: 0; padding: 12px 16px 14px; }
@@ -186,11 +254,34 @@ const EASE = 'transform .4s cubic-bezier(.2,.8,.25,1)';
       .cuerpo .datos > span { padding-top: 4px; padding-bottom: 4px; }
     }
     .datos { margin-top: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); font-size: 13.5px; }
-    .datos > span { padding: 7px 0; border-top: 1px solid rgba(18,52,59,.08); }
+    .datos > span { padding: 6px 0; border-top: 1px solid rgba(18,52,59,.08); }
     .k { display: flex; align-items: center; gap: 6px; padding-right: 14px !important; color: var(--gris); font-size: 12px; }
     .k .ms { font-size: 16px; }
     .v { color: var(--texto); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .v.huerfano { color: var(--gris); font-style: italic; }
+    /* "Te doy" puede ocupar dos líneas; lo que no entra se ve completo en el detalle */
+    .v.largo { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; text-wrap: pretty; }
+    .info {
+      flex: none; width: 30px; height: 30px; margin-left: 2px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+      border: 1px solid rgba(245,240,230,.28); background: rgba(245,240,230,.08); color: var(--crema);
+    }
+    .info .ms { font-size: 18px; }
+    .info:hover { background: rgba(245,240,230,.18); }
+
+    .det-cab { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .det-cod { font-family: var(--serif); font-size: 30px; line-height: 1; letter-spacing: -.02em; color: var(--petroleo); }
+    .det-cod small { font-size: 15px; opacity: .7; }
+    .det-tipo { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 3px 7px; border-radius: 999px; font-size: 11.5px;
+      border: 1px solid rgba(18,52,59,.18); color: var(--texto-2); }
+    .det-tipo .ms { font-size: 15px; }
+    .det-bio { margin: 12px 0 4px; font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.42; color: var(--texto-2); text-wrap: pretty; }
+    .det-datos { display: grid; grid-template-columns: auto minmax(0, 1fr); margin-top: 10px; font-size: 14px; }
+    .det-datos > span { padding: 9px 0; border-top: 1px solid rgba(18,52,59,.08); }
+    .det-datos .v { white-space: normal; overflow: visible; line-height: 1.35; }
+    .det-votar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .det-nope { background: var(--papel); color: var(--rechazo); box-shadow: inset 0 0 0 1px rgba(208,87,63,.35); }
+    .det-votar .ms { font-size: 20px; }
+    .btn-texto { width: 100%; margin-top: 4px; }
     .lavado { position: absolute; inset: 0; pointer-events: none; }
     .sello {
       position: absolute; top: 30px; padding: 6px 14px; border-radius: 10px; background: rgba(255,252,246,.95);
@@ -230,6 +321,9 @@ export class VotarComponent implements OnInit {
   private readonly pendiente = signal<Perfil | null>(null);
   readonly errorObj = signal<string | null>(null);
   private readonly hojaObjecion = viewChild.required<TemplateRef<unknown>>('hojaObjecion');
+  private readonly hojaDetalle = viewChild.required<TemplateRef<unknown>>('hojaDetalle');
+  /** Procedimiento que se muestra completo en la hoja de detalle. */
+  readonly detalle = signal<Perfil | null>(null);
   readonly categorias = CATEGORIAS_LISTA;
   readonly etiquetas = CATEGORIAS;
   obj: { categoria: CategoriaObjecion | null; texto: string } = { categoria: null, texto: '' };
@@ -338,13 +432,40 @@ export class VotarComponent implements OnInit {
   soltar(): void {
     if (!this.arrastrando()) return;
     const dx = this.dx();
-    if (dx > UMBRAL) this.votar('LIKE');
+    if (Math.abs(dx) < TOQUE && Math.abs(this.dy()) < TOQUE) {
+      // Un toque (sin arrastre) abre el detalle completo
+      this.arrastrando.set(false);
+      this.dx.set(0);
+      this.dy.set(0);
+      const p = this.actual();
+      if (p) this.abrirDetalle(p);
+    } else if (dx > UMBRAL) this.votar('LIKE');
     else if (dx < -UMBRAL) this.votar('NOPE');
     else {
       this.arrastrando.set(false);
       this.dx.set(0);
       this.dy.set(0);
     }
+  }
+
+  abrirDetalle(p: Perfil): void {
+    if (this.salida()) return;
+    this.detalle.set(p);
+    this.ui.abrirHoja(this.hojaDetalle());
+  }
+
+  /** Votar desde la hoja de detalle: con NOPE la hoja pasa a ser la de objeción. */
+  votarDesdeDetalle(valor: ValorVoto): void {
+    if (valor === 'LIKE') this.ui.cerrarHoja();
+    this.votar(valor);
+  }
+
+  /** El navegador se quedó con el gesto (por ejemplo, scroll del detalle en el celular): la carta vuelve a su lugar. */
+  cancelar(): void {
+    if (!this.arrastrando()) return;
+    this.arrastrando.set(false);
+    this.dx.set(0);
+    this.dy.set(0);
   }
 
   /** La carta sale volando enseguida. Con NOPE se ofrece objetar (anónimo); el voto viaja después. */
