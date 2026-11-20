@@ -38,6 +38,7 @@ Actualización de la app a la versión 2 del diseño (devolución de la cátedra
 - `v2/208-velorio.yaml`: `causa_muerte → causa`, `numero_acta`, `herencia`, `lecciones`, `reencarnacion_id`, `sin_reemplazo_motivo`, tres firmas; migra `acta_firmada/firmado_por/fecha_firma` a la firma de Dirección y después las borra.
 - `v2/209-mejora.yaml`: tabla `mejora` + secuencia `mejora_codigo_seq`.
 - `v2/300-seed-demo.yaml` (+ `v2/seed-demo.sql`): `context: demo`. Vacía todo y carga el seed v2.
+- `v2/301-seed-demo-textos.yaml` (+ `v2/seed-demo-textos.sql`): `context: demo`. Textos formales de los procedimientos (nombre, bio, beneficio, versión express) sin tocar el changeset 300.
 - `application.yml`: umbrales nuevos (`umbral-casamiento`, `umbral-velorio`, `quorum-area`, `participacion-minima`), `spring.liquibase.contexts: base`. `application-demo.yml`: `contexts: base,demo`.
 
 Dominio (`dominio/`):

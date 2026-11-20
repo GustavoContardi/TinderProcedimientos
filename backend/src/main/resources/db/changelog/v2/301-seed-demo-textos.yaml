@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 301-seed-demo-textos-formales
+      author: tinder-v2
+      context: demo
+      comment: >
+        Textos de los procedimientos de la demo con un tono más formal (nombre, bio, beneficio y versión express).
+        No cambia códigos, estados, votos ni ningún otro dato del seed 300.
+      changes:
+        - sqlFile:
+            path: seed-demo-textos.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+            encoding: UTF-8

@@ -24,3 +24,4 @@ databaseChangeLog:
   - include: { file: v2/208-velorio.yaml, relativeToChangelogFile: true }
   - include: { file: v2/209-mejora.yaml, relativeToChangelogFile: true }
   - include: { file: v2/300-seed-demo.yaml, relativeToChangelogFile: true }
+  - include: { file: v2/301-seed-demo-textos.yaml, relativeToChangelogFile: true }
