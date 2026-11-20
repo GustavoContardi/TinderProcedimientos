@@ -106,11 +106,34 @@ class TinderServiceTest {
     }
 
     @Test
+    @DisplayName("NOPE sin motivo => 400 MOTIVO_OBLIGATORIO y no se guarda nada")
+    void nopeSinMotivo() {
+        assertThatThrownBy(() -> tinder.votar(facundo, voto(ValorVoto.NOPE, null)))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> {
+                    ApiException api = (ApiException) e;
+                    assertThat(api.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(api.getCodigo()).isEqualTo("MOTIVO_OBLIGATORIO");
+                });
+        verifyNoInteractions(votosEmitidos, votos, objeciones);
+    }
+
+    @Test
+    @DisplayName("NOPE con categoría Otro y sin texto => 400 MOTIVO_OBLIGATORIO")
+    void nopeOtroSinTexto() {
+        assertThatThrownBy(() -> tinder.votar(facundo, voto(ValorVoto.NOPE, new ObjecionRequest(CategoriaObjecion.OTRO, "   "))))
+                .isInstanceOf(ApiException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getCodigo()).isEqualTo("MOTIVO_OBLIGATORIO"));
+        verifyNoInteractions(votosEmitidos, votos, objeciones);
+    }
+
+    @Test
     @DisplayName("Doble voto en el mismo ciclo => 409 y no se guarda nada")
     void dobleVotoDevuelve409() {
         when(votosEmitidos.existsById(new VotoEmitido.Id(6L, 1L, 4L))).thenReturn(true);
 
-        assertThatThrownBy(() -> tinder.votar(facundo, voto(ValorVoto.NOPE, null)))
+        assertThatThrownBy(() -> tinder.votar(facundo, voto(ValorVoto.NOPE,
+                new ObjecionRequest(CategoriaObjecion.DESACTUALIZADO, null))))
                 .isInstanceOf(ApiException.class)
                 .satisfies(e -> {
                     ApiException api = (ApiException) e;

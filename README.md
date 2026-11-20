@@ -21,7 +21,7 @@ Después de la devolución de la cátedra:
 
 1. **Umbrales 70 / 40** (antes 60 / 60): 70 % o más en todas las áreas → casamiento; menos de 40 % en todas → velorio; cualquier otra combinación → segunda cita.
 2. **Matriz de participación**: cada empleado vota **solo los procedimientos en los que participa** (antes votaba todos los de su área). Fuera de la matriz, la API responde 403.
-3. **Objeciones de la minoría** con circuito propio: objeción anónima al votar NOPE (o en la boda / el aniversario), agrupación por categoría, segunda cita, decisión y tablero de mejoras.
+3. **Objeciones de la minoría** con circuito propio: objeción anónima **obligatoria** al votar NOPE: el motivo es requisito para rechazar (o en la boda / el aniversario), agrupación por categoría, segunda cita, decisión y tablero de mejoras.
 4. **Juez de paz** (`JUEZ_PAZ`) reemplaza a Calidad y coordina todo el sistema. La **Dirección** deja de oficiar: es *padrino institucional* (firma, revisa y designa al juez, con rotación anual).
 5. **Acta de defunción con trazabilidad**: causa, herencia, lecciones, reencarnación (el procedimiento que lo reemplaza, que puede nacer en BORRADOR) y tres firmas (juez, Dirección y dueño).
 6. **Tablero de mejoras** (kanban): NUEVA → EN ANÁLISIS → EN CURSO → RESUELTA / DESCARTADA, con respuesta obligatoria al cerrar.
@@ -87,7 +87,7 @@ Contraseña de todos: **`demo123`**. En el login hay botones para entrar con un 
    - En **Swipe** aparece *"Votás solo los procedimientos en los que participás"*: el mazo trae solo PR-01, PR-02, PR-04 y F-09 (su matriz). F-07 y F-08 no aparecen.
    - Cada carta muestra cuánto tiempo lleva, qué aporta, cuánto se usa, el **dueño** y el **padrino**. Tocá la carta (o el botón ⓘ) para abrir el **detalle completo**: bio, beneficio, áreas y base normativa si es obligatorio. Desde ahí también se puede votar.
    - Deslizá uno a la derecha (♥ *Me sirve*): aparece el cartel **Voto registrado**, que explica que pasa a casamiento si al cierre alcanza el 70 % en las áreas que lo usan.
-   - Deslizá otro a la izquierda (✕ *Me sobra*): se abre *"¿Por qué te sobra?"* (opcional y anónimo). Elegí una categoría, escribí algo y tocá **Enviar objeción** (o **Saltar**).
+   - Deslizá otro a la izquierda (✕ *Me sobra*): se abre *"¿Por qué te sobra?"*: el **motivo es obligatorio** y anónimo. Elegí el motivo (si es *Otro*, describilo), agregá un detalle si querés y tocá **Confirmar "Me sobra"**. Con **Cancelar** la carta vuelve al mazo sin votar.
 2. **Juez: objeciones, mejoras y segunda cita de F-07** (`juez@demo.com`, ~1 min)
    - **Juez de paz → Objeciones**: agrupadas por procedimiento y categoría, sin autor. Marcá una de F-23 como *Fundada* con su respuesta → aparece el link a la mejora **M-007** creada en el tablero.
    - **Juez de paz → Segundas citas → F-07** (*Encuesta de satisfacción de la mesa de ayuda*): *Empezar la cita* arranca el cronómetro de 30 min (presentación, debate, propuestas, decisión) y abajo están las 4 objeciones *"La encuesta tiene cinco preguntas y la mayoría de los usuarios no la completa."*.
@@ -140,7 +140,7 @@ Extras: **Aniversarios** (PR-06 cumple 6 meses: informe con objeciones y mejoras
 |---|---|---|
 | GET | `/auth/me` | todos |
 | GET | `/tinder/mazo` (matriz del usuario: ciclo trimestral + votaciones rápidas) | todos |
-| POST | `/tinder/votos` `{procedimientoId, cicloId, valor, objecion?: {categoria, texto}}` → 201 · 400 objeción con LIKE · 403 fuera de la matriz · 409 ya votó | todos |
+| POST | `/tinder/votos` `{procedimientoId, cicloId, valor, objecion: {categoria, texto}}` (objeción obligatoria con NOPE, prohibida con LIKE) → 201 · 400 objeción con LIKE · 400 `MOTIVO_OBLIGATORIO` (NOPE sin motivo, u *Otro* sin texto) · 403 fuera de la matriz · 409 ya votó | todos |
 | GET | `/ciclos`, `/ciclos/actual` (trimestral, 204 si no hay) | todos |
 | POST | `/ciclos`, `/ciclos/{id}/cerrar` (trimestral o rápido) | JUEZ_PAZ |
 | GET | `/resultados?cicloId=&areaId=` (por procedimiento, con sus áreas) | EMPLEADO: su área · resto: todas |
@@ -175,11 +175,11 @@ Errores siempre como `{codigo, mensaje}` en español (400 validación, 401, 403,
 
 ## Tests (JUnit 5)
 
-`./mvnw verify` corre 61 tests, sin base de datos (Mockito):
+`./mvnw verify` corre 63 tests, sin base de datos (Mockito):
 
 - `ClasificadorVeredictoTest`: 70 % → CASAMIENTO, 69,9 % → SEGUNDA_CITA, 40 % → SEGUNDA_CITA, 39,9 % → VELORIO; obligatorio con 10 % → SEGUNDA_CITA; áreas 85 % y 20 % → SEGUNDA_CITA con relación a distancia; 40 % de participación → PARTICIPACION_INSUFICIENTE; quórum por área; grupal; parámetros configurables.
 - `CicloServiceTest`: participación insuficiente sin cambio de estado; obligatorio nunca a velorio (con cita convocada); dos segundas citas seguidas → `requiere_reformulacion` + mejora REFORMULACION; el contador vuelve a 0; votación rápida de CASAR_CON_CONDICIONES.
-- `TinderServiceTest`: voto + objeción en la misma transacción; fuera de la matriz → 403; objeción con LIKE → 400; doble voto → 409.
+- `TinderServiceTest`: voto + objeción en la misma transacción; fuera de la matriz → 403; objeción con LIKE → 400; NOPE sin motivo u *Otro* sin texto → 400; doble voto → 409.
 - `AnonimatoTest`: `Voto` y `Objecion` sin campos de usuario ni fecha/hora (reflexión).
 - `CasamientoServiceTest`: objeción fundada sin respuesta → 422; oficiante que no es JUEZ_PAZ → 422; testigo de un área que se casa → 422; libreta completa.
 - `VelorioServiceTest`: VELADO solo con las 3 firmas; firma repetida → 409; reencarnación BORRADOR → mejora "redactar el reemplazo"; causa sugerida.
@@ -214,6 +214,7 @@ Cuando algo era ambiguo se eligió lo más simple que respetara las reglas:
 20. **Frontend**: `/swipe` es la ruta del mazo (`/votar` redirige). `/casamientos`, `/velorios`, `/aniversarios` y `/archivo` son pestañas de Registro. Las páginas del juez (`/matriz`, `/objeciones`, `/segundas-citas`, `/gestion`) cuelgan de **Juez de paz** en la barra de navegación. Se agregó `/mis-procedimientos` (desde el perfil) para que el dueño ajuste su procedimiento.
 21. **Nombre "Pasá y Rebotá"**: el nombre visible de la aplicación (login, encabezado, título de la pestaña, Swagger, `spring.application.name`, `pom.xml`, proyecto Angular) pasó de "Tinder de procedimientos" a **Pasá y Rebotá**, y los textos que decían "el Tinder" dicen "votación" o "ciclo trimestral". Quedan con `tinder` solo los identificadores técnicos, para no romper datos ni sesiones: el paquete Java `ar.gob.defensoria.tinder`, las propiedades `tinder.*`, la ruta `/api/tinder`, el estado `EN_TINDER` (se muestra como "En votación"), la base y el volumen de Docker `tinder`, las claves de `localStorage` y el autor `tinder-v2` de los changesets.
 22. **Tono formal**: los mensajes que genera el backend (veredictos, mejoras automáticas, errores) y los textos de la interfaz se redactaron en tono formal. El cartel "¡Es un match!" pasó a ser **Voto registrado**: aparece con cada voto *Me sirve* (el backend devuelve `match: true` en todo LIKE), así que confirma el voto en lugar de anunciar un acuerdo del área. Se mantienen las metáforas del diseño (casamiento, velorio, segunda cita, padrino, juez de paz) porque son los nombres de las etapas.
+23. **Motivo obligatorio al rechazar**: un voto NOPE siempre lleva una objeción con categoría; si la categoría es *Otro*, también texto. Lo valida el backend (400 `MOTIVO_OBLIGATORIO`) y la hoja *"¿Por qué te sobra?"* ya no tiene "Saltar": se confirma con motivo o se cancela y la carta vuelve al mazo. El texto sigue siendo opcional para el resto de las categorías. Los votos NOPE del seed anteriores a esta regla quedan como están.
 
 ### Decisiones de la v1 que siguen vigentes
 

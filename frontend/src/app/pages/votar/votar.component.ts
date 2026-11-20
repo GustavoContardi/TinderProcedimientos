@@ -171,11 +171,11 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
 
     <ng-template #hojaObjecion>
       <div class="titulo-hoja">¿Por qué te sobra?</div>
-      <p class="sub-hoja">Opcional y anónimo: no queda tu nombre en ningún lado. El juez de paz la evalúa y la responde.</p>
+      <p class="sub-hoja">Para rechazar hay que indicar el motivo. Es anónimo: no queda tu nombre en ningún lado. El juez de paz lo evalúa y lo responde.</p>
       <div class="form">
         <label class="campo">
-          <span>Categoría</span>
-          <select [(ngModel)]="obj.categoria" name="categoria">
+          <span>Motivo (obligatorio)</span>
+          <select [(ngModel)]="obj.categoria" name="categoria" (ngModelChange)="errorObj.set(null)">
             <option [ngValue]="null" disabled>Elegí una…</option>
             @for (c of categorias; track c) {
               <option [ngValue]="c">{{ etiquetas[c] }}</option>
@@ -183,14 +183,14 @@ export class RecorteLineasDirective implements AfterViewInit, OnDestroy {
           </select>
         </label>
         <label class="campo">
-          <span>Contanos un poco más (opcional)</span>
+          <span>{{ obj.categoria === 'OTRO' ? 'Describí el motivo (obligatorio)' : 'Detalle (opcional)' }}</span>
           <textarea rows="3" maxlength="1000" [(ngModel)]="obj.texto" name="texto" placeholder="Ej.: la encuesta es demasiado extensa para completarla después de cada ticket"></textarea>
         </label>
         @if (errorObj()) {
           <div class="error-form">{{ errorObj() }}</div>
         }
-        <button class="btn btn-petroleo" (click)="enviarObjecion()">Enviar objeción</button>
-        <button class="btn-texto" (click)="saltar()">Saltar</button>
+        <button class="btn btn-petroleo" (click)="enviarObjecion()">Confirmar "Me sobra"</button>
+        <button class="btn-texto" (click)="ui.cerrarHoja()">Cancelar y volver a la carta</button>
       </div>
     </ng-template>
   `,
@@ -317,7 +317,7 @@ export class VotarComponent implements OnInit {
   /** 1 = sale a la derecha (me sirve), -1 = a la izquierda (me sobra). */
   readonly salida = signal<0 | 1 | -1>(0);
   readonly sinAnimacion = signal(false);
-  /** Carta que salió como NOPE y espera "Enviar objeción" o "Saltar". */
+  /** Carta que salió como NOPE y espera el motivo (obligatorio) o que se cancele. */
   private readonly pendiente = signal<Perfil | null>(null);
   readonly errorObj = signal<string | null>(null);
   private readonly hojaObjecion = viewChild.required<TemplateRef<unknown>>('hojaObjecion');
@@ -487,16 +487,16 @@ export class VotarComponent implements OnInit {
   enviarObjecion(): void {
     const p = this.pendiente();
     if (!p) return;
+    const texto = this.obj.texto.trim();
     if (!this.obj.categoria) {
-      this.errorObj.set('Elegí una categoría (o tocá "Saltar" para votar sin objetar).');
+      this.errorObj.set('Elegí el motivo del rechazo.');
       return;
     }
-    this.enviar(p, 'NOPE', { categoria: this.obj.categoria, texto: this.obj.texto.trim() || null });
-  }
-
-  saltar(): void {
-    const p = this.pendiente();
-    if (p) this.enviar(p, 'NOPE', null);
+    if (this.obj.categoria === 'OTRO' && !texto) {
+      this.errorObj.set('Con "Otro motivo" hay que describirlo.');
+      return;
+    }
+    this.enviar(p, 'NOPE', { categoria: this.obj.categoria, texto: texto || null });
   }
 
   private enviar(p: Perfil, valor: ValorVoto, objecion: ObjecionNueva | null): void {
@@ -505,7 +505,7 @@ export class VotarComponent implements OnInit {
     const voto$ = this.api.votar(p.id, p.cicloId, valor, objecion).pipe(
       tap((r) => {
         if (r.match) this.ui.mostrarMatch(`${p.codigo} ${p.nombre}`);
-        else if (objecion) this.ui.ok('Objeción anónima enviada. Te van a responder en el tablero.');
+        else if (objecion) this.ui.ok('Voto registrado. El motivo llegó de forma anónima al juez de paz.');
       }),
       map(() => null as unknown),
       catchError((e: unknown) => of(e)),

@@ -76,10 +76,20 @@ public class TinderService {
             throw ApiException.pedidoInvalido("OBJECION_CON_LIKE",
                     "Solo se objeta un NOPE: si te sirve, no hay nada que objetar.");
         }
+        if (req.valor() == ValorVoto.NOPE) {
+            if (objecion == null || objecion.categoria() == null) {
+                throw ApiException.pedidoInvalido("MOTIVO_OBLIGATORIO",
+                        "Para rechazar un procedimiento hay que indicar el motivo (categoría de la objeción).");
+            }
+            if (objecion.categoria() == CategoriaObjecion.OTRO && ProcedimientoService.blancoANull(objecion.texto()) == null) {
+                throw ApiException.pedidoInvalido("MOTIVO_OBLIGATORIO",
+                        "Con \"Otro motivo\" hay que describirlo.");
+            }
+        }
         CicloVotacion ciclo = ciclos.findById(req.cicloId())
                 .orElseThrow(() -> ApiException.noEncontrado("No existe el ciclo " + req.cicloId()));
         if (ciclo.getEstado() != EstadoCiclo.ABIERTO) {
-            throw ApiException.reglaNegocio("CICLO_CERRADO", "El ciclo " + ciclo.getNombre() + " ya cerró. Llegaste tarde a la cita.");
+            throw ApiException.reglaNegocio("CICLO_CERRADO", "El ciclo " + ciclo.getNombre() + " ya cerró.");
         }
         Procedimiento p = procedimientos.findById(req.procedimientoId())
                 .orElseThrow(() -> ApiException.noEncontrado("No existe el procedimiento " + req.procedimientoId()));
